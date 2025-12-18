@@ -17,7 +17,7 @@ limitations under the License.
 local io = io
 if io then
 
-local System = System
+local System = _G.System
 local define = System.define
 local throw = System.throw
 local each = System.each
@@ -101,3 +101,5 @@ define("System.IO.File", {
 })
 
 end
+
+return true

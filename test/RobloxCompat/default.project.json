@@ -1,0 +1,27 @@
+{
+  "name": "CSharpLuaRobloxTest",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "config": {
+        "$path": "config.lua"
+      },
+      "CoreSystem": {
+        "$path": "../../CSharp.lua/CoreSystem.Lua"
+      },
+      "GameSystem": {
+        "$path": "GameSystemOutput"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "CoreSystemTests": {
+        "$path": "CoreSystemTests.server.lua"
+      },
+      "TestRunner": {
+        "$path": "TestRunner.server.lua"
+      }
+    }
+  }
+}

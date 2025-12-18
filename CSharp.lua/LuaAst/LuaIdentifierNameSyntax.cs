@@ -22,7 +22,15 @@ namespace CSharpLua.LuaAst {
     public static readonly LuaIdentifierNameSyntax Placeholder = "_";
     public static readonly LuaIdentifierNameSyntax One = 1.ToString();
     public static readonly LuaIdentifierNameSyntax System = "System";
+    public static readonly LuaIdentifierNameSyntax GlobalSystem = "_G.System";
     public static readonly LuaIdentifierNameSyntax Namespace = "namespace";
+
+    public static LuaIdentifierNameSyntax CreateGlobalSystem(string namespacePath) {
+      if (string.IsNullOrEmpty(namespacePath)) {
+        return GlobalSystem;  // Default "_G.System"
+      }
+      return $"_G.{namespacePath}.System";
+    }
     public static readonly LuaIdentifierNameSyntax Class = "class";
     public static readonly LuaIdentifierNameSyntax Struct = "struct";
     public static readonly LuaIdentifierNameSyntax Interface = "interface";

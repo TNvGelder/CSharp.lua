@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local Object = System.Object
 local debugsetmetatable = System.debugsetmetatable
@@ -337,3 +337,5 @@ end
 
 local EventArgs = System.define("System.EventArgs")
 EventArgs.Empty = setmetatable({}, EventArgs)
+
+return true

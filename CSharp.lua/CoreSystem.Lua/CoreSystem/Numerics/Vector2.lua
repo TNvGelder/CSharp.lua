@@ -1,4 +1,4 @@
-local System = System
+local System = _G.System
 local SystemNumerics = System.Numerics
 
 local abs = math.abs
@@ -273,3 +273,4 @@ Vector2.TransformNormal = function (normal, matrix)
  end
 
 System.defStc("System.Numerics.Vector2", Vector2)
+return true

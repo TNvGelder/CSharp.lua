@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local each = System.each
 local wrap = System.wrap
@@ -270,3 +270,5 @@ System.HashSet = System.define("System.Collections.Generic.HashSet", function(T)
     __genericTKey__ = T,
   }
 end, HashSet, 1)
+
+return true

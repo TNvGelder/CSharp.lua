@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local Array = System.Array
 
 local Stack = {
@@ -43,3 +43,5 @@ end, Stack, 1)
 
 System.Stack = StackFn
 System.stack = StackFn(System.Object)
+
+return true

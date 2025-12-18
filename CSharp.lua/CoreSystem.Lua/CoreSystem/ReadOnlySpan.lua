@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 
 local throw = System.throw
 local ArgumentOutOfRangeException = System.ArgumentOutOfRangeException
@@ -93,3 +93,5 @@ local ReadOnlySpanFn = System.defStc("System.ReadOnlySpan", function (T)
 end, ReadOnlySpan, 1)
 
 System.ReadOnlySpan = ReadOnlySpanFn
+
+return true

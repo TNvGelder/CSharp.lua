@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local clear = System.Array.clear
 local toString = System.toString
@@ -210,3 +210,5 @@ local StringBuilder = System.define("System.Text.StringBuilder", {
   end
 })
 System.StringBuilder = StringBuilder
+
+return true

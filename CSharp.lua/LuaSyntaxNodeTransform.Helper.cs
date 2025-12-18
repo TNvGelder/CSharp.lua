@@ -192,8 +192,14 @@ namespace CSharpLua {
       }
     }
 
-    private static bool CheckLocalBadWord(ref string name, SyntaxNode node) {
+    private bool CheckLocalBadWord(ref string name, SyntaxNode node) {
       if (LuaSyntaxNode.IsReservedWord(name)) {
+        name = GetUniqueIdentifier(name, node, 1);
+        return true;
+      }
+
+      // Escape Roblox global identifiers when targeting Roblox
+      if (IsRoblox && LuaSyntaxNode.IsRobloxReservedWord(name)) {
         name = GetUniqueIdentifier(name, node, 1);
         return true;
       }

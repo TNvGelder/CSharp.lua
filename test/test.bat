@@ -1,29 +1,31 @@
-cd TestCases
-call test
-if not %errorlevel%==0 (
-  goto:Fail
-)
-cd ..
+@echo off
+pushd "%~dp0"
 
-cd self-compiling
+pushd RobloxCompat
 call test
-if not %errorlevel%==0 (
-  goto:Fail
-)
-cd ..
+if not %errorlevel%==0 goto :Fail
+popd
 
-cd BridgeNetTests/Tests
+pushd TestCases
 call test
-if not %errorlevel%==0 (
-  goto:Fail 
-)
-cd ../..
+if not %errorlevel%==0 goto :Fail
+popd
+
+pushd self-compiling
+call test
+if not %errorlevel%==0 goto :Fail
+popd
+
+pushd BridgeNetTests\Tests
+call test
+if not %errorlevel%==0 goto :Fail
+popd
+
+popd
+exit /b 0
 
 :Fail
-if not %errorlevel%==0 (
-  pause
-  exit -1
-)
-
-
-
+popd
+popd
+pause
+exit /b 1

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local Array = System.Array
 
 local function tryDequeue(this)
@@ -52,3 +52,5 @@ end, Queue, 1)
 
 System.Queue = QueueFn
 System.queue = QueueFn(System.Object)
+
+return true

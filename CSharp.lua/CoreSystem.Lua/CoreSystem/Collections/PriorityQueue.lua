@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local each = System.each
 local er = System.er 
@@ -183,3 +183,5 @@ local PriorityQueueFn = System.define("System.Collections.Generic.PriorityQueue"
 end, PriorityQueue, 2)
 
 System.PriorityQueue = PriorityQueueFn
+
+return true

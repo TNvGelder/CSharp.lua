@@ -42,6 +42,8 @@ namespace CSharpLua {
     public bool IsPreventDebugObject { get; set; }
     public bool IsNotConstantForEnum { get; set; }
     public bool IsNoConcurrent { get; set; }
+    public bool IsRoblox { get; set; }
+    public string SystemNamespace { get; set; } = "";
     public string Include { get; set; }
 
     public Compiler(string input, string output, string lib, string meta, string csc, bool isClassic, string atts, string enums) {
@@ -178,6 +180,8 @@ namespace CSharpLua {
         IsPreventDebugObject = IsPreventDebugObject,
         IsNotConstantForEnum = IsNotConstantForEnum,
         IsNoConcurrent = IsNoConcurrent,
+        IsRoblox = IsRoblox,
+        SystemNamespace = SystemNamespace,
       };
       return new LuaSyntaxGenerator(codes, libs, cscArguments_, Metas, setting);
     }

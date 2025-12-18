@@ -1309,3 +1309,5 @@ function Enumerable.Average(source, ...)
   end
   throw(InvalidOperationException("NoElements"))
 end
+
+return true

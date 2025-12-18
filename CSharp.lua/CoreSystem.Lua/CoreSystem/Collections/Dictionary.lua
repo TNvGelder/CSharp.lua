@@ -783,3 +783,5 @@ System.ArrayDictionary = ArrayDictionaryFn
 
 local Object = System.Object
 System.Hashtable = DictionaryFn(Object, Object)
+
+return true

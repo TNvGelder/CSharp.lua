@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local Char = System.Char
 local throw = System.throw
 local emptyFn = System.emptyFn
@@ -730,70 +730,139 @@ local function inherits(_, T)
   return { System.IEnumerable_1(System.Char), System.IComparable, System.IComparable_1(T), System.IConvertible, System.IEquatable_1(T), System.ICloneable }
 end
 
-string.traceback = emptyFn  -- make throw(str) not fail
-string.getLength = lengthFn
-string.getCount = lengthFn
-string.get = get
-string.Compare = compareFull
-string.CompareOrdinal = compareFull
-string.Concat = concat
-string.Copy = System.identityFn
-string.Equals = equals
-string.Format = format
-string.IsNullOrEmpty = isNullOrEmpty
-string.IsNullOrWhiteSpace = isNullOrWhiteSpace
-string.JoinEnumerable = joinEnumerable
-string.JoinParams = joinParams
-string.Join = join
-string.CompareTo = compare
-string.CompareToObj = compareToObj
-string.Contains = contains
-string.CopyTo = copyTo
-string.EndsWith = endsWith
-string.EqualsObj = equalsObj
-string.GetEnumerator = getEnumerator
-string.GetTypeCode = getTypeCode
-string.IndexOf = indexOf
-string.IndexOfAny = indexOfAny
-string.Insert = insert
-string.LastIndexOf = lastIndexOf
-string.LastIndexOfAny = lastIndexOfAny
-string.PadLeft = padLeft
-string.PadRight = padRight
-string.Remove = remove
-string.Replace = replace
-string.Split = split
-string.StartsWith = startsWith
-string.Substring = substring
-string.ToCharArray = toCharArray
-string.ToLower = lower
-string.ToLowerInvariant = lower
-string.ToString = System.identityFn
-string.ToUpper = upper
-string.ToUpperInvariant = upper
-string.Trim = trim
-string.TrimEnd = trimEnd
-string.TrimStart = trimStart
+-- In Roblox/Luau, string table is frozen - create wrapper instead
+local isRoblox = rawget(_G, "__isRoblox")
+local String
 
-if debugsetmetatable then
-  String = string
-  String.__genericT__ = System.Char
-  String.base = inherits
+if isRoblox then
+  -- Create a separate String table for Roblox (can't modify built-in string)
+  String = {
+    traceback = emptyFn,
+    getLength = lengthFn,
+    getCount = lengthFn,
+    get = get,
+    Compare = compareFull,
+    CompareOrdinal = compareFull,
+    Concat = concat,
+    Copy = System.identityFn,
+    Equals = equals,
+    Format = format,
+    IsNullOrEmpty = isNullOrEmpty,
+    IsNullOrWhiteSpace = isNullOrWhiteSpace,
+    JoinEnumerable = joinEnumerable,
+    JoinParams = joinParams,
+    Join = join,
+    CompareTo = compare,
+    CompareToObj = compareToObj,
+    Contains = contains,
+    CopyTo = copyTo,
+    EndsWith = endsWith,
+    EqualsObj = equalsObj,
+    GetEnumerator = getEnumerator,
+    GetTypeCode = getTypeCode,
+    IndexOf = indexOf,
+    IndexOfAny = indexOfAny,
+    Insert = insert,
+    LastIndexOf = lastIndexOf,
+    LastIndexOfAny = lastIndexOfAny,
+    PadLeft = padLeft,
+    PadRight = padRight,
+    Remove = remove,
+    Replace = replace,
+    Split = split,
+    StartsWith = startsWith,
+    Substring = substring,
+    ToCharArray = toCharArray,
+    ToLower = lower,
+    ToLowerInvariant = lower,
+    ToString = System.identityFn,
+    ToUpper = upper,
+    ToUpperInvariant = upper,
+    Trim = trim,
+    TrimEnd = trimEnd,
+    TrimStart = trimStart,
+    __genericT__ = System.Char,
+    base = inherits
+  }
+  -- Add string library functions
+  for k, v in pairs(string) do
+    if String[k] == nil then
+      String[k] = v
+    end
+  end
   System.define("System.String", String)
-
-  debugsetmetatable("", String)
-  local Object = System.Object
-  local StringMetaTable = setmetatable({ __index = Object, __call = ctor }, Object)
-  setmetatable(String, StringMetaTable)
 else
-  string.__call = ctor
-  string.__index = string
-
-  String = getmetatable("")
-  String.__genericT__ = System.Char
-  String.base = inherits
-  System.define("System.String", String)
-  String.__index = string
-  setmetatable(String, string)
-  setmetatable(string, System.Object)
+  -- Standard Lua: extend the string table
+  string.traceback = emptyFn  -- make throw(str) not fail
+  string.getLength = lengthFn
+  string.getCount = lengthFn
+  string.get = get
+  string.Compare = compareFull
+  string.CompareOrdinal = compareFull
+  string.Concat = concat
+  string.Copy = System.identityFn
+  string.Equals = equals
+  string.Format = format
+  string.IsNullOrEmpty = isNullOrEmpty
+  string.IsNullOrWhiteSpace = isNullOrWhiteSpace
+  string.JoinEnumerable = joinEnumerable
+  string.JoinParams = joinParams
+  string.Join = join
+  string.CompareTo = compare
+  string.CompareToObj = compareToObj
+  string.Contains = contains
+  string.CopyTo = copyTo
+  string.EndsWith = endsWith
+  string.EqualsObj = equalsObj
+  string.GetEnumerator = getEnumerator
+  string.GetTypeCode = getTypeCode
+  string.IndexOf = indexOf
+  string.IndexOfAny = indexOfAny
+  string.Insert = insert
+  string.LastIndexOf = lastIndexOf
+  string.LastIndexOfAny = lastIndexOfAny
+  string.PadLeft = padLeft
+  string.PadRight = padRight
+  string.Remove = remove
+  string.Replace = replace
+  string.Split = split
+  string.StartsWith = startsWith
+  string.Substring = substring
+  string.ToCharArray = toCharArray
+  string.ToLower = lower
+  string.ToLowerInvariant = lower
+  string.ToString = System.identityFn
+  string.ToUpper = upper
+  string.ToUpperInvariant = upper
+  string.Trim = trim
+  string.TrimEnd = trimEnd
+  string.TrimStart = trimStart
 end
+
+if not isRoblox then
+  -- Only run this setup in standard Lua (already handled for Roblox above)
+  if debugsetmetatable then
+    String = string
+    String.__genericT__ = System.Char
+    String.base = inherits
+    System.define("System.String", String)
+
+    debugsetmetatable("", String)
+    local Object = System.Object
+    local StringMetaTable = setmetatable({ __index = Object, __call = ctor }, Object)
+    setmetatable(String, StringMetaTable)
+  else
+    string.__call = ctor
+    string.__index = string
+
+    String = getmetatable("")
+    String.__genericT__ = System.Char
+    String.base = inherits
+    System.define("System.String", String)
+    String.__index = string
+    setmetatable(String, string)
+    setmetatable(string, System.Object)
+  end
+end
+
+return true

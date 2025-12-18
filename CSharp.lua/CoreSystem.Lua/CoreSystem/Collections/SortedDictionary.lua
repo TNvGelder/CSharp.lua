@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local Array = System.Array
 local ArrayDictionary = System.ArrayDictionary
 
@@ -53,5 +53,4 @@ end, SortedDictionary, 2)
 
 System.SortedDictionary = SortedDictionaryFn
 
-
-
+return true

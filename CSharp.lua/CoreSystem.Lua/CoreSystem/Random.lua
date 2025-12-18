@@ -3,7 +3,7 @@
 -- Licensed to the .NET Foundation under one or more agreements.
 -- The .NET Foundation licenses this file to you under the MIT license.
 -- See the LICENSE file in the project root for more information.
-local System = System
+local System = _G.System
 local ArrayInt32 = System.Array(System.Int32)
 System.define("System.Random", (function ()
   local Sample, InternalSample, GenerateSeed, Next, GetSampleForLargeRange, NextDouble, 
@@ -18,7 +18,7 @@ System.define("System.Random", (function ()
     local mj, mk
 
     --Initialize our Seed array.
-    local subtraction = (Seed == -2147483648 --[[Int32.MinValue]]) and 2147483647 --[[Int32.MaxValue]] or math.Abs(Seed)
+    local subtraction = (Seed == -2147483648 --[[Int32.MinValue]]) and 2147483647 --[[Int32.MaxValue]] or math.abs(Seed)
     mj = 161803398 --[[Random.MSEED]] - subtraction
     this._seedArray:set(55, mj)
     mk = 1
@@ -161,3 +161,5 @@ System.define("System.Random", (function ()
     __ctor__ = __ctor__
   }
 end)())
+
+return true

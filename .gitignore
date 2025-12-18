@@ -254,3 +254,4 @@ test/**/out/**/*.lua
 /CSharp.lua/Properties/launchSettings.json
 /CSharp.lua.Launcher/Properties/launchSettings.json
 /download/*.zip
+/.claude/settings.local.json

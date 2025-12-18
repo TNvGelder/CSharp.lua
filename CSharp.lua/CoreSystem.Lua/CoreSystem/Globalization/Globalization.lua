@@ -1,4 +1,4 @@
-local System = System
+local System = _G.System
 local emptyFn = System.emptyFn
 local define = System.define
 
@@ -14,3 +14,4 @@ define("System.Globalization.CultureInfo", {
 define("System.Globalization.DateTimeFormatInfo", {
   getInvariantInfo = emptyFn,
 })
+return true

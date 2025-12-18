@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local div = System.div
 local trunc = System.trunc
@@ -300,3 +300,5 @@ zero = TimeSpan(0)
 TimeSpan.Zero = zero
 TimeSpan.MaxValue = TimeSpan(9223372036854775807)
 TimeSpan.MinValue = TimeSpan((-9223372036854775807 - 1))
+
+return true

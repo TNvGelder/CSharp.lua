@@ -1,0 +1,18 @@
+{
+  "name": "CSharpLuaRuntime",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "CoreSystem": {
+        "$path": "../CoreSystem.Lua"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "TestScript": {
+        "$path": "test.server.lua"
+      }
+    }
+  }
+}

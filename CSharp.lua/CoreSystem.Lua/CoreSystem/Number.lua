@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local define = System.defStc
 local equals = System.equals
@@ -418,3 +418,4 @@ if not debugsetmetatable then
   end
 end
 
+return true

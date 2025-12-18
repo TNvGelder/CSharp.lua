@@ -1,4 +1,4 @@
-local System = System
+local System = _G.System
 local SystemNumerics = System.Numerics
 
 local sqrt = math.sqrt
@@ -1605,3 +1605,4 @@ Matrix4x4.Decompose = function(matrix, scale, rotation, translation)
 end
 
 System.defStc("System.Numerics.Matrix4x4", Matrix4x4)
+return true

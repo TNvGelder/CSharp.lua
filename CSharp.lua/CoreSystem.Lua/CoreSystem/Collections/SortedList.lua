@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local lengthFn = System.lengthFn
 local Array = System.Array
 local ArrayDictionary = System.ArrayDictionary
@@ -58,3 +58,4 @@ end, SortedList, 2)
 
 System.SortedList = SortedListFn
 
+return true

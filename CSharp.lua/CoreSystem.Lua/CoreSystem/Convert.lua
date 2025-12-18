@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local cast = System.cast
 local as = System.as
@@ -714,7 +714,8 @@ local schar = string.char
 
 -- https://github.com/ToxicFrog/vstruct/blob/master/io/endianness.lua#L30
 local isLittleEndian = true
-if rawget(global, "jit") then
+if (not rawget(_G, "__isRoblox")) and rawget(global, "jit") then
+  -- LuaJIT: use FFI to detect endianness
   if require("ffi").abi("be") then
     isLittleEndian = false
   end
@@ -993,3 +994,5 @@ define("System.BitConverter", {
   DoubleToInt64Bits = doubleToInt64Bits,
   Int64BitsToDouble = int64BitsToDouble
 })
+
+return true

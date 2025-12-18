@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local define = System.define
 local defStc = System.defStc
 local throw = System.throw
@@ -966,3 +966,5 @@ local function each(async, t)
 end
 
 System.asynceach = each
+
+return true

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local defInf = System.defInf
 local emptyFn = System.emptyFn
 
@@ -116,3 +116,5 @@ defInf("System.IEqualityComparer")
 defInf("System.IEqualityComparer_1", emptyFn)
 
 System.enumMetatable.interface = { IComparable, IFormattable, IConvertible }
+
+return true

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local Array = System.Array
 
 local SortedSet = {
@@ -54,3 +54,5 @@ local SortedSetFn = System.define("System.Collections.Generic.SortedSet", functi
 end, SortedSet, 1)
 
 System.SortedSet = SortedSetFn
+
+return true

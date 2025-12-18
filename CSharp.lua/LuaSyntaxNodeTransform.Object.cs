@@ -1016,6 +1016,11 @@ namespace CSharpLua {
         return nameExpression;
       }
 
+      // Handle property templates specially (similar to VisitMemberAccessExpression)
+      if (symbol.Kind == SymbolKind.Property && nameExpression is LuaPropertyTemplateExpressionSyntax) {
+        return BuildFieldOrPropertyMemberAccessExpression(target, nameExpression, symbol.IsStatic);
+      }
+
       bool isObjectColon = symbol.Kind == SymbolKind.Method || (symbol.Kind == SymbolKind.Property && !IsPropertyFieldOrEventField(symbol));
       return target.MemberAccess(nameExpression, isObjectColon);
     }

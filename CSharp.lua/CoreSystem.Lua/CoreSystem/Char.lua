@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local Int = System.Int
 local ArgumentNullException = System.ArgumentNullException
@@ -233,3 +233,5 @@ local Char = System.defStc("System.Char", {
 local ValueType = System.ValueType
 local charMetaTable = setmetatable({ __index = ValueType, __call = Char.default }, ValueType)
 setmetatable(Char, charMetaTable)
+
+return true

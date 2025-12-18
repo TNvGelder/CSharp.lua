@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local trunc = System.trunc
 
 local math = math
@@ -193,7 +193,7 @@ end
 local log10 = math.log10
 if not log10 then
   log10 = function (x) return log(x, 10) end
-  math.log10 = log10
+  -- Don't modify math table (it's read-only in Luau/Roblox)
 end
 
 local exp = math.exp
@@ -202,7 +202,8 @@ local pow = math.pow or function (x, y) return x ^ y end
 local sinh = math.sinh or function (x) return (exp(x) - exp(-x)) / 2.0 end
 local tanh = math.tanh or function (x) return sinh(x) / cosh(x) end
 
-local Math = math
+-- Create new table with fallback to math (don't modify math which is read-only in Luau/Roblox)
+local Math = setmetatable({}, {__index = math})
 Math.Abs = abs
 Math.Acos = math.acos
 Math.Acosh = acosh
@@ -247,3 +248,5 @@ Math.Truncate = truncate
 
 System.define("System.Math", Math)
 System.define("System.MathF", Math)
+
+return true

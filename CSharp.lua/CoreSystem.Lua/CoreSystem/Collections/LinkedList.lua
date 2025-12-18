@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local define = System.define
 local throw = System.throw
 local each = System.each
@@ -344,3 +344,5 @@ System.LinkedList = define("System.Collections.Generic.LinkedList", function(T)
   __len = LinkedList.getCount
   }
 end, LinkedList, 1)
+
+return true

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 
 local throw = System.throw
 local ArgumentOutOfRangeException = System.ArgumentOutOfRangeException
@@ -105,3 +105,5 @@ local SpanFn = System.defStc("System.Span", function (T)
 end, Span, 1)
 
 System.Span = SpanFn
+
+return true

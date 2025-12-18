@@ -120,6 +120,8 @@ namespace CSharpLua {
     private bool IsLuaClassic => generator_.Setting.IsClassic;
     private bool IsLuaNewest => !IsLuaClassic;
     private bool IsPreventDebug => generator_.Setting.IsPreventDebugObject;
+    private bool IsRoblox => generator_.Setting.IsRoblox;
+    private string SystemNamespace => generator_.Setting.SystemNamespace;
 
     private LuaCompilationUnitSyntax CurCompilationUnit {
       get {
@@ -250,7 +252,7 @@ namespace CSharpLua {
     }
 
     public LuaCompilationUnitSyntax VisitCompilationUnit(CompilationUnitSyntax node, bool isSingleFile = false) {
-      LuaCompilationUnitSyntax compilationUnit = new LuaCompilationUnitSyntax(node.SyntaxTree.FilePath, !isSingleFile);
+      LuaCompilationUnitSyntax compilationUnit = new LuaCompilationUnitSyntax(node.SyntaxTree.FilePath, !isSingleFile, IsRoblox, SystemNamespace);
       compilationUnits_.Push(compilationUnit);
 
       var statements = VisitTriviaAndNode(node, node.Members, false);
@@ -1572,6 +1574,9 @@ namespace CSharpLua {
     private LuaExpressionSyntax BuildCommonAssignmentExpression(LuaExpressionSyntax left, LuaExpressionSyntax right, string operatorToken, ExpressionSyntax rightNode, ExpressionSyntax parent) {
       bool isPreventDebugConcatenation = IsPreventDebug && operatorToken == LuaSyntaxNode.Tokens.Concatenation;
       if (left is LuaPropertyTemplateExpressionSyntax propertyTemplate) {
+        if (propertyTemplate.GetExpression == null) {
+          throw new InvalidOperationException("Property template requires a getter for compound assignment operations");
+        }
         var arguments = propertyTemplate.GetArguments(propertyTemplate.GetExpression.Binary(operatorToken, right));
         return BuildCodeTemplateExpression(propertyTemplate.SetTemplate, arguments, propertyTemplate.Name);
       } else if (left is LuaPropertyAdapterExpressionSyntax propertyAdapter) {
@@ -1617,7 +1622,9 @@ namespace CSharpLua {
     }
 
     private LuaExpressionSyntax BuildDelegateBinaryExpression(LuaExpressionSyntax left, LuaExpressionSyntax right, bool isPlus) {
-      if (IsPreventDebug) {
+      // In Roblox, delegate +/- operators don't work because nil doesn't have a metatable
+      // Use System.DelegateCombine/DelegateRemove instead
+      if (IsPreventDebug || IsRoblox) {
         var methodName = isPlus ? LuaIdentifierNameSyntax.DelegateCombine : LuaIdentifierNameSyntax.DelegateRemove;
         return new LuaInvocationExpressionSyntax(methodName, left, right);
       }
@@ -1628,9 +1635,11 @@ namespace CSharpLua {
 
     private LuaExpressionSyntax BuildDelegateAssignmentExpression(LuaExpressionSyntax left, LuaExpressionSyntax right, bool isPlus) {
       if (left is LuaPropertyTemplateExpressionSyntax propertyTemplate) {
-        var expr = isPlus
-          ? propertyTemplate.GetExpression.Plus(right)
-          : propertyTemplate.GetExpression.Sub(right);
+        if (propertyTemplate.GetExpression == null) {
+          throw new InvalidOperationException("Property template requires a getter for delegate assignment operations");
+        }
+        // Use BuildDelegateBinaryExpression to ensure Roblox compatibility
+        var expr = BuildDelegateBinaryExpression(propertyTemplate.GetExpression, right, isPlus);
         return BuildCodeTemplateExpression(propertyTemplate.SetTemplate, propertyTemplate.GetArguments(expr), propertyTemplate.Name);
       }
 
@@ -1650,6 +1659,9 @@ namespace CSharpLua {
 
     private LuaExpressionSyntax BuildBinaryInvokeAssignmentExpression(LuaExpressionSyntax left, LuaExpressionSyntax right, LuaExpressionSyntax methodName) {
       if (left is LuaPropertyTemplateExpressionSyntax propertyTemplate) {
+        if (propertyTemplate.GetExpression == null) {
+          throw new InvalidOperationException("Property template requires a getter for binary invoke assignment operations");
+        }
         var invocation = new LuaInvocationExpressionSyntax(methodName, propertyTemplate.GetExpression, right);
         var arguments = propertyTemplate.GetArguments(invocation);
         return BuildCodeTemplateExpression(propertyTemplate.SetTemplate, arguments, propertyTemplate.Name);
@@ -2380,9 +2392,12 @@ namespace CSharpLua {
             invocation.AddArgument(memberAccess.Expression);
           } else {
             invocation = new LuaInvocationExpressionSyntax(memberAccess);
-            if (IsPreventDebug && symbol is {IsStatic: false}) {
+            // In Roblox, basic types like string can't have custom methods via metatables
+            // So convert instance method calls to static calls: str:Contains() -> System.String.Contains(str)
+            if ((IsPreventDebug || IsRoblox) && symbol is {IsStatic: false}) {
               var containingType = symbol.ContainingType;
-              if (containingType.IsBasicType()) {
+              // IsBasicType doesn't include String (System_String is after System_Double in enum)
+              if (containingType.IsBasicType() || containingType.IsStringType()) {
                 var typeName = GetTypeName(containingType);
                 invocation = typeName.MemberAccess(memberAccess.Name).Invocation(memberAccess.Expression);
               } else if (containingType.SpecialType == SpecialType.System_Object || containingType.IsBasicTypInterface()) {
@@ -2426,6 +2441,20 @@ namespace CSharpLua {
       var arguments = BuildInvocationArguments(symbol, node, out var refOrOutArguments);
       var expression = node.Expression.AcceptExpression(this);
       var invocation = CheckInvocationExpression(symbol, expression);
+
+      // In Roblox, basic types (numbers, strings) can't have methods via metatables
+      // Check if the receiver expression is a basic type and convert to static call
+      if (IsRoblox && symbol is {IsStatic: false} && node.Expression is MemberAccessExpressionSyntax memberAccessNode) {
+        var receiverType = semanticModel_.GetTypeInfo(memberAccessNode.Expression).Type;
+        if (receiverType != null && (receiverType.IsBasicType() || receiverType.IsStringType())) {
+          // Convert to static call: receiver.Method(args) -> Type.Method(receiver, args)
+          var typeName = GetTypeName(receiverType);
+          var methodName = GetMemberName(symbol);
+          var receiverExpr = memberAccessNode.Expression.AcceptExpression(this);
+          invocation = typeName.MemberAccess(methodName).Invocation(receiverExpr);
+        }
+      }
+
       invocation.AddArguments(arguments);
       LuaExpressionSyntax resultExpression = invocation;
       if (symbol != null && symbol.HasAggressiveInliningAttribute()) {
@@ -2736,14 +2765,25 @@ namespace CSharpLua {
         return name;
       }
 
+      // In Roblox, basic types like string can't have methods added via metatables
+      // Don't use colon syntax for instance method calls on basic types
+      bool useColonForMethod = !symbol.IsStatic && symbol.Kind == SymbolKind.Method;
+      if (useColonForMethod && IsRoblox) {
+        var methodSymbol = (IMethodSymbol)symbol;
+        // IsBasicType doesn't include String (System_String is after System_Double in enum)
+        if (methodSymbol.ContainingType.IsBasicType() || methodSymbol.ContainingType.IsStringType()) {
+          useColonForMethod = false; // Will be converted to static call in CheckInvocationExpression
+        }
+      }
+
       return symbol.Kind switch {
         SymbolKind.Property or SymbolKind.Event =>
           BuildFieldOrPropertyMemberAccessExpression(expression, name, symbol.IsStatic),
-        
+
         SymbolKind.Method when IsDelegateExpression((IMethodSymbol)symbol, node, name, expression, out var delegateExpression) =>
           delegateExpression,
 
-        _ => expression.MemberAccess(name, !symbol.IsStatic && symbol.Kind == SymbolKind.Method)
+        _ => expression.MemberAccess(name, useColonForMethod)
       };
     }
 
@@ -4104,7 +4144,9 @@ namespace CSharpLua {
 
       AddExportEnum(typeInfo);
       var typeName = GetTypeShortName(typeInfo);
-      if (IsPreventDebug || isNullable) {
+      // In Roblox, numbers don't have metatables, so we can't use original:EnumToString()
+      // Use System.EnumToString(original, typeName) instead which works with plain numbers
+      if (IsPreventDebug || isNullable || IsRoblox) {
         return LuaIdentifierNameSyntax.System.MemberAccess(LuaIdentifierNameSyntax.EnumToString).Invocation(original, typeName);
       }
 
@@ -4140,7 +4182,8 @@ namespace CSharpLua {
         }
         case >= SpecialType.System_SByte and <= SpecialType.System_Double:
           if (format != null || alignment != null) {
-            if (IsPreventDebug) {
+            // In Roblox, numbers can't have methods via metatables, so use static System.ToString()
+            if (IsPreventDebug || IsRoblox) {
               return FormatAlignment(original, format, alignment);
             } else {
               if (alignment == null) {

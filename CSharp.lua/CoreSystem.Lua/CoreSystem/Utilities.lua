@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local define = System.define
 local trunc = System.trunc
@@ -31,7 +31,7 @@ local tostring = tostring
 local collectgarbage = collectgarbage
 
 define("System.Environment", {
-  Exit = os.exit,
+  Exit = rawget(_G, "__isRoblox") and function() error("Environment.Exit is not supported in Roblox") end or os.exit,
   getStackTrace = System.traceback,
   getTickCount = function ()
     return System.currentTimeMillis() % 2147483648
@@ -211,3 +211,5 @@ define("System.WeakReference", {
 
 define("System.Guid", {})
 define("System.ArraySegment", {})
+
+return true

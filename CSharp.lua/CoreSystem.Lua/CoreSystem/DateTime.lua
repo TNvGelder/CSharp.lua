@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local div = System.div
 local trunc = System.trunc
@@ -647,3 +647,5 @@ System.defEnum("System.DayOfWeek", {
   Friday = 5,
   Saturday = 6
 })
+
+return true

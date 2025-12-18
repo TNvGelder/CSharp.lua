@@ -1793,3 +1793,5 @@ define("System.ReadOnlyCollection", function (T)
     __genericT__ = T
   }
 end, ReadOnlyCollection, 1)
+
+return true

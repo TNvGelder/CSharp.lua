@@ -114,6 +114,16 @@ namespace CSharpLua {
 
     internal void Render(LuaCompilationUnitSyntax node) {
       WriteNodes(node.Statements);
+      // In Roblox mode, modules must return a value (unless there's already a return statement)
+      if (node.IsRoblox) {
+        bool hasReturnStatement = node.Statements.Count > 0 &&
+          node.Statements[node.Statements.Count - 1] is LuaAst.LuaBaseReturnStatementSyntax;
+        if (!hasReturnStatement) {
+          WriteNewLine();
+          Write("return true");
+          WriteNewLine();
+        }
+      }
     }
 
     internal void Render(LuaWrapFunctionStatementSyntax node) {

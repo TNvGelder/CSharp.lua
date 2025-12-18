@@ -1,4 +1,4 @@
-local System = System
+local System = _G.System
 local SystemNumerics = System.Numerics
 
 local sqrt = math.sqrt
@@ -161,3 +161,4 @@ Plane.GetHashCode = function (this)
 end
 
 System.defStc("System.Numerics.Plane", Plane)
+return true

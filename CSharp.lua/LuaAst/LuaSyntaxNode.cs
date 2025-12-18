@@ -127,9 +127,23 @@ namespace CSharpLua.LuaAst {
       "internal", "virtual",
     };
 
-    private static readonly HashSet<string> ReservedWords = new() {            
+    private static readonly HashSet<string> ReservedWords = new() {
       // compiler reserved words
       "System", "Linq",
+    };
+
+    // Roblox global identifiers that would conflict with user code
+    private static readonly HashSet<string> RobloxReservedWords = new() {
+      // Core globals
+      "game", "workspace", "script", "plugin", "shared",
+      // Types that are also globals
+      "Enum", "Instance", "Vector3", "Vector2", "CFrame", "Color3",
+      "UDim", "UDim2", "Rect", "Ray", "Region3", "TweenInfo",
+      "Axes", "Faces", "BrickColor", "NumberRange", "NumberSequence",
+      "ColorSequence", "PhysicalProperties", "PathWaypoint", "Font",
+      // Task library and other globals
+      "task", "utf8", "bit32", "buffer", "typeof", "warn",
+      "tick", "wait", "delay", "spawn", "time", "settings",
     };
 
     static LuaSyntaxNode() {
@@ -151,6 +165,10 @@ namespace CSharpLua.LuaAst {
 
     public static bool IsReservedWord(string identifier) {
       return ReservedWords.Contains(identifier);
+    }
+
+    public static bool IsRobloxReservedWord(string identifier) {
+      return RobloxReservedWords.Contains(identifier);
     }
 
     public static bool IsMethodReservedWord(string identifier) {

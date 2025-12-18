@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local toString = System.toString
 
 local print = print
@@ -41,9 +41,10 @@ local Console = System.define("System.Console", {
 })
 
 local io = io
-if io then
+if io and not rawget(_G, "__isRoblox") then
   local stdin = io.stdin
   local stdout = io.stdout
+  local stderr = io.stderr or io.stdout  -- fallback to stdout if stderr unavailable
   local read = stdin.read
   local write = stdout.write
 
@@ -63,4 +64,38 @@ if io then
   function Console.WriteChar(v)
      write(stdout, char(v))
   end
+
+  function Console.SetError(v, ...)
+    stderr:write(getWriteValue(v, ...))
+  end
+else
+  -- Roblox/sandboxed environment: no stdin/stdout
+  -- NOTE: Write/WriteChar use print() which adds a newline. This differs from
+  -- standard Lua behavior, but Roblox has no io.write equivalent. In practice,
+  -- this only affects code that builds output incrementally with multiple Write calls.
+  function Console.Read()
+    error("Console.Read is not supported in this environment")
+  end
+
+  function Console.ReadLine()
+    error("Console.ReadLine is not supported in this environment")
+  end
+
+  function Console.Write(v, ...)
+    print(getWriteValue(v, ...))
+  end
+
+  function Console.WriteChar(v)
+    print(char(v))
+  end
+
+  function Console.SetError(v, ...)
+    if warn then
+      warn(getWriteValue(v, ...))
+    else
+      print("[ERROR] " .. getWriteValue(v, ...))
+    end
+  end
 end
+
+return true

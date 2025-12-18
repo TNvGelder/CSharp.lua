@@ -354,3 +354,5 @@ System.SwitchExpressionException = define("System.Runtime.CompilerServices", {
   end
 })
 
+
+return true

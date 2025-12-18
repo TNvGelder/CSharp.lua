@@ -1,4 +1,4 @@
-local System = System
+local System = _G.System
 local SystemNumerics = System.Numerics
 
 local tan = math.tan
@@ -552,3 +552,4 @@ Matrix3x2.GetHashCode = function (this)
 end
 
 System.defStc("System.Numerics.Matrix3x2", Matrix3x2)
+return true

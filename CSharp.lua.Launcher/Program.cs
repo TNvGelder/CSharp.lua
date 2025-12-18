@@ -45,6 +45,9 @@ Options
 -inline-property: inline some single-line properties
 -include        : the root directory of the CoreSystem library, adds all the dependencies to a single file named out.lua
 -noconcurrent   : close concurrent compile
+-roblox         : generate Roblox/Luau compatible code (uses _G.<namespace>.System, adds return statement)
+-namespace      : custom namespace path for System (e.g., MyGame.Runtime)
+                  REQUIRED when using -roblox to avoid global pollution
 @file           : read more options from the file
 ";
     public static void Main(string[] args) {
@@ -79,6 +82,17 @@ Options
           bool isInlineSimpleProperty = cmds.ContainsKey("-inline-property");
           bool isNotConstantForEnum = cmds.ContainsKey("-ei");
           bool isNoConcurrent = cmds.ContainsKey("-noconcurrent");
+          bool isRoblox = cmds.ContainsKey("-roblox");
+          string systemNamespace = cmds.GetArgument("-namespace", true);
+
+          // Validate: -roblox requires -namespace
+          if (isRoblox && string.IsNullOrEmpty(systemNamespace)) {
+            Console.Error.WriteLine("Error: -namespace is required when using -roblox mode.");
+            Console.Error.WriteLine("Example: -roblox -namespace MyGame.Runtime");
+            Environment.ExitCode = -1;
+            return;
+          }
+
           string include = cmds.GetArgument("-include", true);
           Compiler c = new Compiler(input, output, lib, meta, csc, isClassic, atts, enums) {
             IsExportMetadata = isExportMetadata,
@@ -88,6 +102,8 @@ Options
             IsNotConstantForEnum = isNotConstantForEnum,
             Include = include,
             IsNoConcurrent = isNoConcurrent,
+            IsRoblox = isRoblox,
+            SystemNamespace = systemNamespace,
           };
           c.Compile();
           Console.WriteLine($"Compiled Success, cost {sw.Elapsed.TotalSeconds}s");

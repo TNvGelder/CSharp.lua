@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local debugsetmetatable = System.debugsetmetatable
 local ArgumentException = System.ArgumentException
@@ -116,3 +116,4 @@ end
 local ValueType = System.ValueType
 local boolMetaTable = setmetatable({ __index = ValueType, __call = Boolean.default }, ValueType)
 setmetatable(Boolean, boolMetaTable)
+return true

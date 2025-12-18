@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local Int = System.Int
 local Number = System.Number
@@ -166,3 +166,5 @@ System.define("System.Enum", {
     return true, result
   end
 })
+
+return true

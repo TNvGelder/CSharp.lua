@@ -70,6 +70,8 @@ namespace CSharpLua {
       public bool IsPreventDebugObject { get; set; }
       public bool IsNotConstantForEnum { get; set; }
       public bool IsNoConcurrent { get; set; }
+      public bool IsRoblox { get; set; }
+      public string SystemNamespace { get; set; } = "";
 
       public SettingInfo() {
         Indent = 2;
@@ -347,7 +349,7 @@ namespace CSharpLua {
       if (types.Count > 0) {
         LuaTableExpression typeTable = new LuaTableExpression();
         typeTable.Add("types", new LuaTableExpression(types.Select(i => new LuaStringLiteralExpressionSyntax(GetTypeShortName(i)))));
-        LuaCompilationUnitSyntax luaCompilationUnit = new LuaCompilationUnitSyntax(hasGeneratedMark: false);
+        LuaCompilationUnitSyntax luaCompilationUnit = new LuaCompilationUnitSyntax(hasGeneratedMark: false, isRoblox: Setting.IsRoblox, systemNamespace: Setting.SystemNamespace);
         luaCompilationUnit.AddStatement(LuaIdentifierNameSyntax.SystemInit.Invocation(typeTable));
         if (mainEntryPoint_ != null) {
           luaCompilationUnit.AddStatement(LuaBlankLinesStatement.One);
@@ -634,7 +636,7 @@ namespace CSharpLua {
           var functionExpression = new LuaFunctionExpressionSyntax();
           functionExpression.AddParameter("path");
           functionExpression.AddStatement(new LuaReturnStatementSyntax(LuaIdentifierNameSyntax.SystemInit.Invocation(t)));
-          var luaCompilationUnit = new LuaCompilationUnitSyntax();
+          var luaCompilationUnit = new LuaCompilationUnitSyntax(isRoblox: Setting.IsRoblox, systemNamespace: Setting.SystemNamespace);
           luaCompilationUnit.AddStatement(new LuaReturnStatementSyntax(functionExpression));
           string outFile = Path.Combine(outFolder, "manifest.lua");
           Write(luaCompilationUnit, outFile);
@@ -1553,6 +1555,11 @@ namespace CSharpLua {
             RefactorTypeName(type, name, 1);
             return;
           }
+          // Escape Roblox global identifiers when targeting Roblox
+          if (generator_.Setting.IsRoblox && LuaSyntaxNode.IsRobloxReservedWord(name)) {
+            RefactorTypeName(type, name, 1);
+            return;
+          }
         } else {
           string newName = name + '_' + type.TypeParameters.Length;
           if (CheckTypeNameExists(classTypes_, type, newName)) {
@@ -1591,6 +1598,9 @@ namespace CSharpLua {
         foreach (var symbol in all) {
           string name = symbol.Name;
           if (LuaSyntaxNode.IsReservedWord(name)) {
+            RefactorNamespaceName(all, symbol, symbol.Name, 1);
+          } else if (generator_.Setting.IsRoblox && LuaSyntaxNode.IsRobloxReservedWord(name)) {
+            // Escape Roblox global identifiers when targeting Roblox
             RefactorNamespaceName(all, symbol, symbol.Name, 1);
           } else {
             if (Utility.IsIdentifierIllegal(ref name)) {

@@ -3,7 +3,7 @@
 -- Licensed to the .NET Foundation under one or more agreements.
 -- The .NET Foundation licenses this file to you under the MIT license.
 -- See the LICENSE file in the project root for more information.
-local System = System
+local System = _G.System
 
 local assert = assert
 local type = type
@@ -637,3 +637,5 @@ System.define("System.Numerics.Complex", (function ()
   }
   return class
 end)())
+
+return true

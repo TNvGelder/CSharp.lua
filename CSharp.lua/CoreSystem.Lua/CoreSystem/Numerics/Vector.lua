@@ -1,4 +1,4 @@
-local System = System
+local System = _G.System
 local throw = System.throw
 
 local ArgumentOutOfRangeException = System.ArgumentOutOfRangeException
@@ -133,3 +133,5 @@ System.defStc("System.Numerics.Vector", function(T)
     __div = Vector.__div,
   }
 end, Vector, 1)
+
+return true

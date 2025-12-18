@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local falseFn = System.falseFn
 local lengthFn = System.lengthFn
 local Array = System.Array
@@ -73,3 +73,5 @@ end, List, 1)
 
 System.List = ListFn
 System.ArrayList = ListFn(System.Object)
+
+return true

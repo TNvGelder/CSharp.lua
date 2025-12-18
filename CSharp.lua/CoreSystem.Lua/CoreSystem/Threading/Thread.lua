@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local define = System.define
 local throw = System.throw
 local trunc = System.trunc
@@ -200,3 +200,5 @@ currentThread = mainThread
 System.ThreadStateException = ThreadStateException
 System.ThreadAbortException = ThreadAbortException
 System.Thread = Thread
+
+return true

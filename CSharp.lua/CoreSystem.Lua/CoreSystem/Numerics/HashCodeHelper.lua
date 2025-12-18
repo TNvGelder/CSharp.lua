@@ -1,4 +1,4 @@
-local System = System
+local System = _G.System
 local bitLShift = System.sl
 local bitNot = System.bnot
 
@@ -9,3 +9,4 @@ function HashCodeHelper.CombineHashCodes(h1, h2)
 end
 
 System.define("System.Numerics.HashCodeHelper", HashCodeHelper)
+return true

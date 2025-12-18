@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local Span = System.Span
 local Array = System.Array
 
@@ -31,3 +31,5 @@ System.MemoryExtensions = {
     return Array.Contains(span._array, value)
   end
 }
+
+return true

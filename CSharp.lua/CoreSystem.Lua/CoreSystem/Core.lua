@@ -487,18 +487,57 @@ if prevSystem then
 end
 global.System = System
 
-local debugsetmetatable = debug and debug.setmetatable
+-- Support namespace relocation
+-- Allows moving System from _G.System to _G.MyGame.System (or any path)
+function System.relocateTo(namespacePath, clearOriginal)
+  if not namespacePath or namespacePath == "" then return System end
+
+  -- Validate namespace string format
+  if namespacePath:match("^%.") or namespacePath:match("%.$") or namespacePath:match("%.%.") then
+    error("Invalid namespace path: '" .. namespacePath .. "' (cannot start/end with dot or have consecutive dots)")
+  end
+
+  local current = _G
+  for segment in namespacePath:gmatch("[^%.]+") do
+    if segment == "" then
+      error("Invalid namespace path: '" .. namespacePath .. "' (empty segment)")
+    end
+    local existing = current[segment]
+    if existing ~= nil and type(existing) ~= "table" then
+      error("Cannot create namespace segment '" .. segment .. "': already exists as " .. type(existing))
+    end
+    current[segment] = existing or {}
+    current = current[segment]
+  end
+  current.System = System
+  if clearOriginal then _G.System = nil end
+  return System
+end
+
+local debugsetmetatable = (not rawget(_G, "__isRoblox")) and debug and debug.setmetatable
 System.debugsetmetatable = debugsetmetatable
 
 local _, _, version = sfind(_VERSION, "^Lua (.*)$")
 version = tonumber(version)
-System.luaVersion = version
+-- Luau (Roblox) reports _VERSION as "Luau", treat it as 5.3+ (has native bitwise ops)
+if not version and sfind(_VERSION, "Luau") then
+  version = 5.4  -- Luau has Lua 5.3+ features including native bitwise operators
+end
+System.luaVersion = version or 5.1
 
-if version < 5.3 then
+-- Use bit library for Lua < 5.3, or when 'load' is unavailable (Luau/Roblox)
+-- Luau has native bitwise operators but blocks 'load', so we use bit32 there
+if (version or 0) < 5.3 or not load then
   local bnot, band, bor, xor, sl, sr
   local bit = rawget(global, "bit")
   if not bit then
+    -- Try rawget first for bit32
     local b32 = rawget(global, "bit32")
+    -- In Roblox, bit32 is an implicit global (like 'game'), not in _G
+    -- Check if we're in Roblox and try to access bit32 directly
+    if not b32 and rawget(global, "__isRoblox") then
+      b32 = bit32  -- bit32 is a global in Roblox/Luau
+    end
     if not b32 then
       local ok, b = pcall(require, "bit")
       if ok then
@@ -1688,7 +1727,20 @@ function System.init(t)
   if files then
     path = (path and #path > 0) and (path .. '.') or ""
     for i = 1, #files do
-      require(path .. files[i])
+      if rawget(_G, "__isRoblox") then
+        -- Roblox: navigate ModuleScript hierarchy
+        local target = t.root or script.Parent
+        local modulePath = path .. files[i]
+        for segment in modulePath:gmatch("[^%.]+") do
+          target = target:FindFirstChild(segment)
+          if not target then
+            error("Module not found: " .. segment .. " in path " .. modulePath)
+          end
+        end
+        require(target)
+      else
+        require(path .. files[i])
+      end
     end
   end
 
@@ -1750,3 +1802,5 @@ if not isSingleFile then
     end
   end
 end
+
+return true

@@ -22,11 +22,25 @@ limitations under the License.
         <field name="NaN" Template="System.Single.NaN" />
         <field name="PositiveInfinity" Template="System.Single.PositiveInfinity" />
         <field name="NegativeInfinity" Template="System.Single.NegativeInfinity" />
+        <method name="ToString" Template="System.Single.ToString({this})" />
+        <method name="ToString" Template="System.Single.ToString({this}, {0})">
+          <arg type="System.String" />
+        </method>
+        <method name="ToString" Template="System.Single.ToString({this}, {0})">
+          <arg type="System.IFormatProvider" />
+        </method>
       </class>
       <class name="Double">
         <field name="NaN" Template="System.Double.NaN" />
         <field name="PositiveInfinity" Template="System.Double.PositiveInfinity" />
         <field name="NegativeInfinity" Template="System.Double.NegativeInfinity" />
+        <method name="ToString" Template="System.Double.ToString({this})" />
+        <method name="ToString" Template="System.Double.ToString({this}, {0})">
+          <arg type="System.String" />
+        </method>
+        <method name="ToString" Template="System.Double.ToString({this}, {0})">
+          <arg type="System.IFormatProvider" />
+        </method>
       </class>
       <class name="Decimal" Name="System.Double" />
       <class name="Char">
@@ -180,11 +194,29 @@ limitations under the License.
         </method>
       </class>
       <class name="Math" Name="math" >
-        <method name="Round" Template="math.Round({0}, nil, {1})">
+        <!-- Map C# Math methods to lowercase Lua math methods -->
+        <method name="Min" Name="min" />
+        <method name="Max" Name="max" />
+        <method name="Abs" Name="abs" />
+        <method name="Floor" Name="floor" />
+        <method name="Ceiling" Name="ceil" />
+        <method name="Sqrt" Name="sqrt" />
+        <method name="Sin" Name="sin" />
+        <method name="Cos" Name="cos" />
+        <method name="Tan" Name="tan" />
+        <method name="Asin" Name="asin" />
+        <method name="Acos" Name="acos" />
+        <method name="Atan" Name="atan" />
+        <method name="Atan2" Template="System.Math.Atan2({0}, {1})" />
+        <method name="Exp" Name="exp" />
+        <method name="Log" Name="log" />
+        <method name="Log10" Template="System.Math.Log10({0})" />
+        <method name="Pow" Template="System.Math.Pow({0}, {1})" />
+        <method name="Round" Template="System.Math.Round({0}, nil, {1})">
           <arg type="System.Double" />
           <arg type="System.MidpointRounding" />
         </method>
-        <method name="Round" Template="math.Round({0}, nil, {1})">
+        <method name="Round" Template="System.Math.Round({0}, nil, {1})">
           <arg type="System.Decimal" />
           <arg type="System.MidpointRounding" />
         </method>

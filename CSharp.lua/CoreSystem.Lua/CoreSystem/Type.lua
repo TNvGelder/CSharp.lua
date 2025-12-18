@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = System
+local System = _G.System
 local throw = System.throw
 local Object = System.Object
 local Boolean = System.Boolean
@@ -507,3 +507,5 @@ function System.castWithNullable(cls, obj)
   end
   return cast(cls, obj)
 end
+
+return true
