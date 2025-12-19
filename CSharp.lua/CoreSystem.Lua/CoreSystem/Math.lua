@@ -40,11 +40,23 @@ local function atanh(a)
 end
 
 local function cbrt(a)
-  if a >= 0 then
-    return a ^ (1 / 3)
-  else
-    return -abs(a) ^ (1 / 3) 
+  if a == 0 or a == 1 or a == -1 then
+    return a
   end
+  local x
+  if a >= 0 then
+    x = a ^ (1 / 3)
+  else
+    x = -((-a) ^ (1 / 3))
+  end
+  -- Fix floating point error for perfect cubes (e.g. 27^(1/3) => 3.0000000004)
+  if a % 1 == 0 then
+    local n = x >= 0 and floor(x + 0.5) or ceil(x - 0.5)
+    if n * n * n == a then
+      return n
+    end
+  end
+  return x
 end
 
 local function copySign(a, b)
@@ -244,6 +256,9 @@ Math.Sinh = sinh
 Math.Sqrt = sqrt
 Math.Tan = math.tan
 Math.Tanh = tanh
+Math.E = exp(1)
+Math.PI = math.pi
+Math.Tau = 2 * math.pi
 Math.Truncate = truncate
 
 System.define("System.Math", Math)

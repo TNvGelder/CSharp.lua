@@ -403,6 +403,14 @@ local Dictionary = (function ()
       end
       return nil
     end,
+    getObj = function (this, key)
+      if key == nil then throw(ArgumentNullException("key")) end
+      local value = this[key]
+      if value == nil or value == null then
+        return nil
+      end
+      return value
+    end,
     set = function (this, key, value)
       if key == nil then throw(ArgumentNullException("key")) end
       local t = counts[this]
@@ -415,6 +423,9 @@ local Dictionary = (function ()
         counts[this] = { 1, 1 }
       end
       this[key] = value == nil and null or value
+    end,
+    setObj = function (this, key, value)
+      this:set(key, value)
     end,
     GetEnumerator = dictionaryEnumerator,
     getKeys = function (this)
@@ -735,8 +746,23 @@ local ArrayDictionary = (function ()
       end
       throw(KeyNotFoundException())
     end,
+    getObj = function (this, key)
+      if key == nil then throw(ArgumentNullException("key")) end
+      local pair = find(this, key)
+      if pair == nil then
+        return nil
+      end
+      local value = pair[2]
+      if value == null then
+        return nil
+      end
+      return value
+    end,
     set = function (this, key, value)
       update(this, true, key, value, true)
+    end,
+    setObj = function (this, key, value)
+      this:set(key, value)
     end,
     GetEnumerator = Array.GetEnumerator,
     getKeys = function (this)

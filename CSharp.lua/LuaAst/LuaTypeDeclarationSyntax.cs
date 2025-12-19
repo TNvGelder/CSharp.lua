@@ -600,9 +600,7 @@ namespace CSharpLua.LuaAst {
         SortMetaData(metaFields_);
         SortMetaData(metaProperties_);
         SortMetaData(metaMethods_);
-        if (renderer.Setting.IsClassic) {
-          CheckMetadataMoreThanUpvalues();
-        }
+        CheckMetadataMoreThanUpvalues();
         var functionExpression = new LuaFunctionExpressionSyntax();
         functionExpression.AddParameter(LuaIdentifierNameSyntax.Global);
         functionExpression.AddStatement(new LuaReturnStatementSyntax(metadata_));

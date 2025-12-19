@@ -860,6 +860,14 @@ local function getBytesFromFloat(value)
 end
 
 local function getBytesFromDouble(value)
+  -- Canonicalize NaN bits to match .NET BitConverter expectations (tests assert exact payload).
+  if value ~= value then
+    if isLittleEndian then
+      return bytes({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0xFF })
+    else
+      return bytes({ 0xFF, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })
+    end
+  end
   local s = spack("d", value)
   return bytes({
     sbyte(s, 1),

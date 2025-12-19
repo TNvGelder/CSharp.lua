@@ -26,6 +26,7 @@ local ArgumentNullException = System.ArgumentNullException
 local ArgumentOutOfRangeException = System.ArgumentOutOfRangeException
 local FormatException = System.FormatException
 local IndexOutOfRangeException = System.IndexOutOfRangeException
+local NullReferenceException = System.NullReferenceException
 
 local string = string
 local char = string.char
@@ -586,6 +587,9 @@ local function padRight(this, totalWidth, paddingChar)
 end
 
 local function remove(this, startIndex, count)
+  if this == nil then
+    throw(NullReferenceException())
+  end
   startIndex, count = checkIndex(this, startIndex, count)
   return sub(this, 1, startIndex) .. sub(this, startIndex + 1 + count)
 end
@@ -732,7 +736,6 @@ end
 
 -- In Roblox/Luau, string table is frozen - create wrapper instead
 local isRoblox = rawget(_G, "__isRoblox")
-local String
 
 if isRoblox then
   -- Create a separate String table for Roblox (can't modify built-in string)

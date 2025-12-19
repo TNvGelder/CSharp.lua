@@ -31,7 +31,8 @@ local sfind = string.find
 local tostring = tostring
 local tonumber = tonumber
 local floor = math.floor
-local log10 = math.log10
+local log = math.log
+local log10 = math.log10 or function (x) return log(x) / log(10) end
 
 local TimeSpan
 local zero

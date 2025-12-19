@@ -38,7 +38,8 @@ local osdate = os.date
 local tonumber = tonumber
 local math = math
 local floor = math.floor
-local log10 = math.log10
+local log = math.log
+local log10 = math.log10 or function (x) return log(x) / log(10) end
 local modf = math.modf
 
 --http://referencesource.microsoft.com/#mscorlib/system/datetime.cs

@@ -128,10 +128,12 @@ local TaskExceptionHolder = {
     if not this.isHandled then
       local e = this.exception
       if e then
-        local ueea = UnobservedTaskExceptionEventArgs(e)
-        publishUnobservedTaskException(this.task, ueea)
-        if not ueea.observed then
-          print("Warning: TaskExceptionHolder" , e)
+        if unobservedTaskException then
+          local ueea = UnobservedTaskExceptionEventArgs(e)
+          publishUnobservedTaskException(this.task, ueea)
+          if not ueea.observed then
+            print("Warning: TaskExceptionHolder" , e)
+          end
         end
       end
     end
@@ -439,29 +441,43 @@ Task = define("System.Threading.Tasks.Task", {
     if count == 0 then
       return getCompletedTask()
     end
-    local result, exceptions, cancelled = {}, {}
+    local result = T and {} or nil
+    local exceptions, cancelled = {}, false
     local t = newWaitingTask()
-    local function f(task)
+    local function f(task, index)
       local status = task.status
       if status == TaskStatusRanToCompletion then
-        result[#result + 1] = task.data
+        if result then
+          result[index] = task.data
+        end
       elseif status == TaskStatusFaulted then
-        local exception = getException(task, true)
-        exceptions[#exceptions + 1] = exception
+        exceptions[index] = getException(task, true)
       elseif status == TaskStatusCanceled then
         cancelled = true
       end
       count = count - 1
       if count == 0 then
-        if #exceptions > 0 then
-          trySetException(t, arrayFromTable(exceptions, Exception))
+        if next(exceptions) ~= nil then
+          local ordered = {}
+          for i = 1, #tasks do
+            local exception = exceptions[i]
+            if exception then
+              ordered[#ordered + 1] = exception
+            end
+          end
+          trySetException(t, arrayFromTable(ordered, Exception))
         elseif cancelled then
           trySetCanceled(t)
         else
           if T then
-            trySetResult(t, arrayFromTable(result, T))
-          end
+            local ordered = {}
+            for i = 1, #tasks do
+              ordered[i] = result[i]
+            end
+            trySetResult(t, arrayFromTable(ordered, T))
+          else
             trySetResult(t)
+          end
         end
       end
     end
@@ -469,10 +485,12 @@ Task = define("System.Threading.Tasks.Task", {
       local task = tasks[i]
       if isCompleted(task) then
         post(function ()
-          f(task)
+          f(task, i)
         end)
       else
-        addContinueAction(task, f)
+        addContinueAction(task, function ()
+          f(task, i)
+        end)
       end
     end
     return t
@@ -489,7 +507,7 @@ Task = define("System.Threading.Tasks.Task", {
       if status == TaskStatusRanToCompletion then
         trySetResult(t, task)
       elseif status == TaskStatusFaulted then
-        trySetException(t, getException(task))
+        trySetException(t, getException(task, true))
       elseif status == TaskStatusCanceled then
         trySetCanceled(t)
       end

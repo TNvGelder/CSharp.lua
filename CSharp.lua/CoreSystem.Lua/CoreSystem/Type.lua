@@ -434,15 +434,32 @@ end
 local is, getName
 
 if System.debugsetmetatable then
+  local function getClassFromObj(obj)
+    local t = type(obj)
+    if t == "number" then
+      return Number
+    elseif t == "boolean" then
+      return Boolean
+    elseif t == "function" then
+      return Delegate
+    end
+    return getmetatable(obj)
+  end
+
   is = function (obj, T)
-    return checks[getmetatable(obj)](obj, T)
+    return checks[getClassFromObj(obj)](obj, T)
   end
 
   getName = function (obj)
-    return obj.__name__
+    return getClassFromObj(obj).__name__
   end
 
-  System.getClassFromObj = getmetatable
+  function System.ObjectGetType(this)
+    if this == nil then throw(NullReferenceException()) end
+    return typeof(getClassFromObj(this))
+  end
+
+  System.getClassFromObj = getClassFromObj
 else
   local function getClassFromObj(obj)
     local t = type(obj)

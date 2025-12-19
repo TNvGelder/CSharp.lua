@@ -120,6 +120,10 @@ local function getRawElapsedSeconds(this)
   return timeElapsed
 end
 
+local function getElapsedTimeSpanTicks(this)
+  return trunc(getRawElapsedSeconds(this) * 1e7)
+end
+
 local Stopwatch
 Stopwatch = define("System.Diagnostics.Stopwatch", {
   elapsed = 0,
@@ -167,10 +171,10 @@ Stopwatch = define("System.Diagnostics.Stopwatch", {
     return this.running
   end,
   getElapsed = function (this)
-    return TimeSpan(trunc(getRawElapsedSeconds(this) * 1e7))
+    return TimeSpan(getElapsedTimeSpanTicks(this))
   end,
   getElapsedMilliseconds = function (this)
-    return trunc(getRawElapsedSeconds(this) * 1000)
+    return trunc(getElapsedTimeSpanTicks(this) / 10000)
   end,
   getElapsedTicks = function (this)
     return trunc(getRawElapsedSeconds(this) * frequency)

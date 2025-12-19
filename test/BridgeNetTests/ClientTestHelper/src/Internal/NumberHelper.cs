@@ -29,7 +29,15 @@ namespace Bridge.ClientTestHelper
 
                 if (typeof(T) == typeof(double))
                 {
-                    var diff = expected.As<double>() - actual.As<double>();
+                    var expectedDouble = expected.As<double>();
+                    var actualDouble = actual.As<double>();
+                    if (double.IsNaN(expectedDouble) && double.IsNaN(actualDouble))
+                    {
+                        Assert.True(true, message + expected + " vs " + actual);
+                        return;
+                    }
+
+                    var diff = expectedDouble - actualDouble;
 
                     if (diff < 0)
                     {
@@ -47,7 +55,15 @@ namespace Bridge.ClientTestHelper
                 }
                 else
                 {
-                    var diff = expected.As<float>() - actual.As<float>();
+                    var expectedSingle = expected.As<float>();
+                    var actualSingle = actual.As<float>();
+                    if (float.IsNaN(expectedSingle) && float.IsNaN(actualSingle))
+                    {
+                        Assert.True(true, message + expected + " vs " + actual);
+                        return;
+                    }
+
+                    var diff = expectedSingle - actualSingle;
 
                     if (diff < 0)
                     {

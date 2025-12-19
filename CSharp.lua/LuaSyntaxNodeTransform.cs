@@ -1947,8 +1947,16 @@ namespace CSharpLua {
         return resultExpression;
       }
 
-      string operatorToken = GetOperatorToken(node.OperatorToken.ValueText[..^1]);
-      return BuildCommonAssignmentExpression(leftNode, rightNode, operatorToken, node);
+        string operatorToken = GetOperatorToken(node.OperatorToken.ValueText[..^1]);
+        if (IsLuaClassic) {
+          if (operatorToken == LuaSyntaxNode.Tokens.ShiftLeft) {
+            return BuildBinaryInvokeAssignmentExpression(leftNode, rightNode, LuaIdentifierNameSyntax.ShiftLeft);
+          }
+          if (operatorToken == LuaSyntaxNode.Tokens.ShiftRight) {
+            return BuildBinaryInvokeAssignmentExpression(leftNode, rightNode, LuaIdentifierNameSyntax.ShiftRight);
+          }
+        }
+        return BuildCommonAssignmentExpression(leftNode, rightNode, operatorToken, node);
     }
 
     private LuaIdentifierNameSyntax BuildBoolXorOfNullAssignmentExpression(LuaExpressionSyntax left, LuaExpressionSyntax right, bool isLeftNullable, bool isRightNullable) {
@@ -4629,8 +4637,16 @@ namespace CSharpLua {
         return GetUserDefinedOperatorExpression(methodSymbol, node.Left, node.Right);
       }
 
-      string operatorToken = GetOperatorToken(node.OperatorToken);
-      return BuildBinaryExpression(node, operatorToken);
+        string operatorToken = GetOperatorToken(node.OperatorToken);
+        if (IsLuaClassic) {
+          if (operatorToken == LuaSyntaxNode.Tokens.ShiftLeft) {
+            return BuildBinaryInvokeExpression(node, LuaIdentifierNameSyntax.ShiftLeft);
+          }
+          if (operatorToken == LuaSyntaxNode.Tokens.ShiftRight) {
+            return BuildBinaryInvokeExpression(node, LuaIdentifierNameSyntax.ShiftRight);
+          }
+        }
+        return BuildBinaryExpression(node, operatorToken);
     }
 
     private bool IsNullableTypeUserDefinedOperator(BinaryExpressionSyntax node, IMethodSymbol methodSymbol, out LuaExpressionSyntax result) {

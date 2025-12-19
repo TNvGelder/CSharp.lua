@@ -67,6 +67,9 @@ local formats = {
 }
 
 local function toStringWithFormat(this, format)
+  if this ~= this then
+    return "NaN"
+  end
   if #format ~= 0 then
     local i, j, x, n = format:find("^%s*([xXdDfFeE])(%d?)%s*$")
     if i then
@@ -81,6 +84,9 @@ local function toStringWithFormat(this, format)
 end
 
 local function toString(this, format)
+  if this ~= this then
+    return "NaN"
+  end
   if format then
     return toStringWithFormat(this, format)
   end
@@ -308,6 +314,19 @@ end
 local function parseDouble(s)
   if s == nil then
     return nil, 1
+  end
+  if type(s) ~= "string" then
+    return nil, 2
+  end
+  local lower = s:match("^%s*(.-)%s*$"):lower()
+  if lower == "nan" or lower == "+nan" or lower == "-nan" then
+    return nan
+  end
+  if lower == "inf" or lower == "+inf" or lower == "infinity" or lower == "+infinity" then
+    return posInf
+  end
+  if lower == "-inf" or lower == "-infinity" then
+    return negInf
   end
   local v = tonumber(s)
   if v == nil then
