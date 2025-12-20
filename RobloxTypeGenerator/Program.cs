@@ -93,9 +93,15 @@ string classesPath = Path.Combine(robloxTypesDir, "Classes.cs");
 await File.WriteAllTextAsync(classesPath, classesCode);
 Console.WriteLine($"  Generated {classesPath}");
 
-// Generate classes (PluginSecurity) - skip classes already generated at None level
+// Generate classes (PluginSecurity) - extension interfaces for mixed classes, full classes for plugin-only
 Console.WriteLine("Generating classes (PluginSecurity)...");
-var pluginClassGenerator = new ClassGenerator(apiDump.Classes, apiDocs, SecurityLevel.PluginSecurity, classGenerator.GeneratedClasses);
+var pluginClassGenerator = new ClassGenerator(
+    apiDump.Classes,
+    apiDocs,
+    SecurityLevel.PluginSecurity,
+    PluginGenerationMode.PluginExtension,  // Plugin mode for extensions
+    "RobloxPlugin",                         // Plugin namespace (not Roblox.Plugin to avoid conflict with Plugin class)
+    classGenerator.GeneratedClasses);
 var pluginClassesSyntax = pluginClassGenerator.Generate();
 string pluginClassesCode = pluginClassesSyntax.ToFullString();
 string pluginClassesPath = Path.Combine(robloxTypesPluginDir, "PluginClasses.cs");
@@ -110,11 +116,16 @@ string metadataPath = Path.Combine(metadataDir, "Roblox.Generated.xml");
 await File.WriteAllTextAsync(metadataPath, metadataXml);
 Console.WriteLine($"  Generated {metadataPath}");
 
-// Generate metadata (PluginSecurity)
+// Generate metadata (PluginSecurity) - for plugin extension classes
 Console.WriteLine("Generating metadata (PluginSecurity)...");
-var pluginMetadataGenerator = new MetadataGenerator(apiDump.Classes, SecurityLevel.PluginSecurity);
+var pluginMetadataGenerator = new MetadataGenerator(
+    apiDump.Classes,
+    SecurityLevel.PluginSecurity,
+    PluginGenerationMode.PluginExtension,  // Plugin mode for extensions
+    "RobloxPlugin",                         // Plugin namespace (not Roblox.Plugin to avoid conflict with Plugin class)
+    classGenerator.GeneratedClasses);
 string pluginMetadataXml = pluginMetadataGenerator.Generate();
-string pluginMetadataPath = Path.Combine(metadataDir, "Roblox.Plugin.Generated.xml");
+string pluginMetadataPath = Path.Combine(metadataDir, "RobloxPlugin.Generated.xml");
 await File.WriteAllTextAsync(pluginMetadataPath, pluginMetadataXml);
 Console.WriteLine($"  Generated {pluginMetadataPath}");
 

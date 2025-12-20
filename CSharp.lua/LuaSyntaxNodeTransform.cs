@@ -123,6 +123,40 @@ namespace CSharpLua {
     private bool IsRoblox => generator_.Setting.IsRoblox;
     private string SystemNamespace => generator_.Setting.SystemNamespace;
 
+    /// <summary>
+    /// Checks if a type is a Roblox enum type (is EnumItem or derives from EnumItem in Roblox namespace).
+    /// Used to map C# enum access (Material.Plastic) to Lua (Enum.Material.Plastic).
+    /// Also used for field access on EnumItem properties (material.Name -> material.Name).
+    /// </summary>
+    private static bool IsRobloxEnumItemType(ITypeSymbol type) {
+      if (type == null) return false;
+
+      // Check if type is in Roblox namespace
+      var ns = type.ContainingNamespace;
+      if (ns == null || ns.Name != "Roblox" || !ns.ContainingNamespace.IsGlobalNamespace) {
+        return false;
+      }
+
+      // Check if type IS EnumItem itself
+      if (type.Name == "EnumItem") {
+        return true;
+      }
+
+      // Check if type derives from EnumItem
+      var current = type.BaseType;
+      while (current != null) {
+        if (current.Name == "EnumItem") {
+          // Also verify EnumItem is in Roblox namespace
+          var enumItemNs = current.ContainingNamespace;
+          if (enumItemNs != null && enumItemNs.Name == "Roblox" && enumItemNs.ContainingNamespace.IsGlobalNamespace) {
+            return true;
+          }
+        }
+        current = current.BaseType;
+      }
+      return false;
+    }
+
     private LuaCompilationUnitSyntax CurCompilationUnit {
       get {
         return compilationUnits_.Peek();
@@ -2771,6 +2805,40 @@ namespace CSharpLua {
           luaInvocation.Arguments[i] = BuildFieldOrPropertyMemberAccessExpression(expression, luaInvocation.Arguments[i], symbol.IsStatic);
         }
         return name;
+      }
+
+      // In Roblox, enum access should emit Enum.{EnumName}.{ItemName} in Lua
+      // Material.Plastic -> Enum.Material.Plastic
+      // Material.GetEnumItems() -> Enum.Material:GetEnumItems()
+      // Only apply when accessing static members on the enum type directly (not on variables)
+      if (IsRoblox && symbol.IsStatic && symbol.ContainingType != null && IsRobloxEnumItemType(symbol.ContainingType)) {
+        // Check if the expression is a direct type access (not a variable of enum type)
+        var expressionSymbol = semanticModel_.GetSymbolInfo(node.Expression).Symbol;
+        if (expressionSymbol is INamedTypeSymbol) {
+          // Get just the type name without namespace prefix
+          LuaIdentifierNameSyntax enumTypeName = symbol.ContainingType.Name;
+          LuaIdentifierNameSyntax enumGlobal = "Enum";
+          var prefixedExpression = enumGlobal.MemberAccess(enumTypeName);
+
+          if (symbol.Kind == SymbolKind.Property) {
+            // Enum items are fields, use the member name directly (not the property adapter)
+            LuaIdentifierNameSyntax memberName = symbol.Name;
+            return prefixedExpression.MemberAccess(memberName);
+          } else if (symbol.Kind == SymbolKind.Method) {
+            // For methods like GetEnumItems(), use colon syntax
+            return prefixedExpression.MemberAccess(name, true);
+          }
+        }
+      }
+
+      // Handle instance property access on EnumItem values (material.Name -> material.Name as field)
+      // EnumItem properties like Name and Value should use field access, not getter calls
+      if (IsRoblox && !symbol.IsStatic && symbol.Kind == SymbolKind.Property) {
+        if (IsRobloxEnumItemType(symbol.ContainingType)) {
+          // Use field access for EnumItem properties
+          LuaIdentifierNameSyntax memberName = symbol.Name;
+          return expression.MemberAccess(memberName);
+        }
       }
 
       // In Roblox, basic types like string can't have methods added via metatables

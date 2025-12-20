@@ -31,7 +31,10 @@ public class EnumGenerator : GeneratorBase {
         // Add EnumItem base class
         members.Add(CreateEnumItemBaseClass());
 
-        // Generate each enum
+        // Generate each enum at top level
+        // Note: Roblox uses Enum.Material in Lua, but C# cannot use "Enum" as a class name
+        // (conflicts with System.Enum). The transpiler handles mapping C# enum access
+        // to Lua's Enum.{EnumName} pattern in LuaSyntaxNodeTransform.cs.
         var sortedEnums = _enums
             .Where(e => !SkipEnums.Contains(e.Name))
             .OrderBy(e => e.Name)

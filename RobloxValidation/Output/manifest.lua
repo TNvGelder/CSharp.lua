@@ -6,6 +6,7 @@ return function (path)
     files = {
       "DataTypesTest",
       "EventsTest",
+      "GeneratedTypesTest",
       "GetServiceTest",
       "InstanceCreationTest",
       "InstanceMethodsTest",
@@ -15,6 +16,7 @@ return function (path)
     types = {
       "RobloxValidation.Tests.DataTypesTest",
       "RobloxValidation.Tests.EventsTest",
+      "RobloxValidation.Tests.GeneratedTypesTest",
       "RobloxValidation.Tests.GetServiceTest",
       "RobloxValidation.Tests.InstanceCreationTest",
       "RobloxValidation.Tests.InstanceMethodsTest",

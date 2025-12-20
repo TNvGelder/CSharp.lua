@@ -48,6 +48,8 @@ namespace CSharpLua.LuaAst {
     public string Prefix;
     public string NewPrefix;
     public bool IsFromCode;
+    public bool IsActuallyUsed;  // Track if output references this namespace
+    public string ResolvedPath;  // Resolved path (e.g., _G.MyNamespace.Roblox)
 
     public int CompareTo(UsingDeclare other) {
       return string.Compare(Prefix, other.Prefix, StringComparison.Ordinal);
@@ -111,11 +113,16 @@ namespace CSharpLua.LuaAst {
     }
 
     private void CheckUsingDeclares() {
-      var imports = UsingDeclares.Where(i => !i.IsFromCode).ToList();
+      // Filter non-code imports by usage (only emit if actually used)
+      var imports = UsingDeclares.Where(i => !i.IsFromCode && i.IsActuallyUsed).ToList();
       if (imports.Count > 0) {
         imports.Sort();
         foreach (var import in imports) {
-          AddImport(import.NewPrefix, import.Prefix);
+          // Use resolved path if available, otherwise fall back to prefix
+          LuaExpressionSyntax importPath = !string.IsNullOrEmpty(import.ResolvedPath)
+            ? (LuaIdentifierNameSyntax)import.ResolvedPath
+            : (LuaIdentifierNameSyntax)import.Prefix;
+          AddImport(import.NewPrefix, importPath);
         }
       }
 
@@ -127,7 +134,8 @@ namespace CSharpLua.LuaAst {
         }
       }
 
-      var usingDeclares = UsingDeclares.Where(i => i.IsFromCode).ToList();
+      // Filter code-based imports by usage (only emit if actually used)
+      var usingDeclares = UsingDeclares.Where(i => i.IsFromCode && i.IsActuallyUsed).ToList();
       var genericDeclares = GenericUsingDeclares.Where(i => i.IsFromCode).ToList();
       if (usingDeclares.Count > 0 || genericDeclares.Count > 0) {
         usingDeclares.Sort();
@@ -146,10 +154,16 @@ namespace CSharpLua.LuaAst {
         functionExpression.AddParameter(global);
         foreach (var usingDeclare in usingDeclares) {
           LuaIdentifierNameSyntax newPrefixIdentifier = usingDeclare.NewPrefix;
-          functionExpression.Body.AddStatement(
-            usingDeclare.Prefix != usingDeclare.NewPrefix
-              ? newPrefixIdentifier.Assignment(usingDeclare.Prefix)
-              : newPrefixIdentifier.Assignment(global.MemberAccess(usingDeclare.Prefix)));
+          // Use resolved path if available for proper namespace resolution
+          if (!string.IsNullOrEmpty(usingDeclare.ResolvedPath)) {
+            functionExpression.Body.AddStatement(
+              newPrefixIdentifier.Assignment((LuaIdentifierNameSyntax)usingDeclare.ResolvedPath));
+          } else {
+            functionExpression.Body.AddStatement(
+              usingDeclare.Prefix != usingDeclare.NewPrefix
+                ? newPrefixIdentifier.Assignment(usingDeclare.Prefix)
+                : newPrefixIdentifier.Assignment(global.MemberAccess(usingDeclare.Prefix)));
+          }
         }
 
         foreach (var usingDeclare in genericDeclares) {
@@ -170,6 +184,17 @@ namespace CSharpLua.LuaAst {
           insertIndex++;
         }
         Statements.Insert(insertIndex, importAreaStatements);
+      }
+    }
+
+    /// <summary>
+    /// Marks a using declaration as actually used in the output.
+    /// Only imports marked as used will be emitted.
+    /// </summary>
+    internal void MarkUsingDeclareAsUsed(string prefix) {
+      var declare = UsingDeclares.Find(i => i.Prefix == prefix || i.NewPrefix == prefix);
+      if (declare != null) {
+        declare.IsActuallyUsed = true;
       }
     }
 

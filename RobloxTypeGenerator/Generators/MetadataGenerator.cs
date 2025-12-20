@@ -9,15 +9,26 @@ namespace RobloxTypeGenerator.Generators;
 public class MetadataGenerator : GeneratorBase {
     private readonly List<ApiClass> _classes;
     private readonly SecurityLevel _securityLevel;
+    private readonly PluginGenerationMode _pluginMode;
+    private readonly string _namespaceName;
+    private readonly HashSet<string> _nonePassClasses;
     private readonly StringBuilder _sb = new();
     private int _indent = 0;
 
     // Reference shared skip list from Constants.cs
     private static HashSet<string> SkipClasses => GeneratorConstants.HandWrittenClasses;
 
-    public MetadataGenerator(List<ApiClass> classes, SecurityLevel securityLevel) {
+    public MetadataGenerator(
+        List<ApiClass> classes,
+        SecurityLevel securityLevel,
+        PluginGenerationMode pluginMode = PluginGenerationMode.None,
+        string namespaceName = "Roblox",
+        HashSet<string>? nonePassClasses = null) {
         _classes = classes;
         _securityLevel = securityLevel;
+        _pluginMode = pluginMode;
+        _namespaceName = namespaceName;
+        _nonePassClasses = nonePassClasses ?? new();
     }
 
     private void AppendLine(string line = "") {
@@ -39,18 +50,36 @@ public class MetadataGenerator : GeneratorBase {
         Indent();
         AppendLine("<assembly>");
         Indent();
-        AppendLine("<namespace name=\"Roblox\">");
+        AppendLine($"<namespace name=\"{EscapeXml(_namespaceName)}\">");
         Indent();
 
-        // Filter and sort classes
-        var filteredClasses = _classes
-            .Where(c => !SkipClasses.Contains(c.Name))
-            .Where(c => _securityLevel == SecurityLevel.None || ShouldGenerateClass(c, _securityLevel))
-            .OrderBy(c => c.Name)
-            .ToList();
+        // Filter classes based on mode:
+        // - None mode: skip hand-written classes (they have metadata in Roblox.xml)
+        // - Plugin mode: include hand-written classes so we generate metadata for plugin members
+        var filteredClasses = _pluginMode == PluginGenerationMode.None
+            ? _classes.Where(c => !SkipClasses.Contains(c.Name)).OrderBy(c => c.Name).ToList()
+            : _classes.Where(c => c.Name != "<<<ROOT>>>").OrderBy(c => c.Name).ToList();
 
         foreach (var cls in filteredClasses) {
-            GenerateClassMetadata(cls);
+            bool hasNoneMembers = cls.Members.Any(m => ShouldGenerateMember(m, SecurityLevel.None));
+            bool hasPluginMembers = cls.Members.Any(m => ShouldGenerateMember(m, SecurityLevel.PluginSecurity));
+
+            if (_pluginMode == PluginGenerationMode.None) {
+                // Normal None-security pass
+                if (hasNoneMembers) {
+                    GenerateClassMetadata(cls, cls.Name);
+                }
+            } else {
+                // Plugin pass
+                if (hasPluginMembers) {
+                    // Check if base class exists (generated in None pass, or hand-written)
+                    bool baseClassExists = hasNoneMembers || _nonePassClasses.Contains(cls.Name) || SkipClasses.Contains(cls.Name);
+
+                    // Extension interfaces get Plugin suffix, plugin-only classes use regular name
+                    string className = baseClassExists ? cls.Name + "Plugin" : cls.Name;
+                    GenerateClassMetadata(cls, className);
+                }
+            }
         }
 
         Dedent();
@@ -63,7 +92,7 @@ public class MetadataGenerator : GeneratorBase {
         return _sb.ToString();
     }
 
-    private void GenerateClassMetadata(ApiClass cls) {
+    private void GenerateClassMetadata(ApiClass cls, string className) {
         // Filter members based on security level
         var members = cls.Members
             .Where(m => ShouldGenerateMember(m, _securityLevel))
@@ -75,7 +104,7 @@ public class MetadataGenerator : GeneratorBase {
             return;
         }
 
-        AppendLine($"<class name=\"{EscapeXml(cls.Name)}\">");
+        AppendLine($"<class name=\"{EscapeXml(className)}\">");
         Indent();
 
         foreach (var member in members) {
@@ -107,18 +136,44 @@ public class MetadataGenerator : GeneratorBase {
         string name = member.Name;
         string luaAccess = GetLuaPropertyAccess(name);
 
-        AppendLine($"<property name=\"{EscapeXml(name)}\">");
+        // Check accessor security - setter may require higher security than getter
+        string readSecurity = member.GetReadSecurity();
+        string writeSecurity = member.GetWriteSecurity();
+
+        bool canRead = !member.IsWriteOnly && CanAccessAtSecurityLevel(readSecurity, _securityLevel);
+        bool canWrite = !member.IsReadOnly && CanAccessAtSecurityLevel(writeSecurity, _securityLevel);
+
+        // Skip if neither accessor is available at this security level
+        if (!canRead && !canWrite) {
+            return;
+        }
+
+        // Use IsField="true" pattern for writable properties (no <set> tag needed)
+        if (canWrite) {
+            AppendLine($"<property name=\"{EscapeXml(name)}\" IsField=\"true\">");
+        } else {
+            AppendLine($"<property name=\"{EscapeXml(name)}\">");
+        }
         Indent();
 
-        if (!member.IsWriteOnly) {
+        // Only emit <get> - never emit <set> when using IsField pattern
+        if (canRead) {
             AppendLine($"<get Template=\"{{this}}{EscapeXml(luaAccess)}\" />");
-        }
-        if (!member.IsReadOnly) {
-            AppendLine($"<set Template=\"{{this}}{EscapeXml(luaAccess)} = {{0}}\" />");
         }
 
         Dedent();
         AppendLine("</property>");
+    }
+
+    /// <summary>
+    /// Checks if a member is accessible at the given security level.
+    /// </summary>
+    private static bool CanAccessAtSecurityLevel(string memberSecurity, SecurityLevel currentLevel) {
+        return currentLevel switch {
+            SecurityLevel.None => memberSecurity == "None",
+            SecurityLevel.PluginSecurity => memberSecurity == "None" || memberSecurity == "PluginSecurity",
+            _ => false
+        };
     }
 
     /// <summary>

@@ -10,6 +10,15 @@ public enum SecurityLevel {
     PluginSecurity
 }
 
+public enum PluginGenerationMode {
+    /// <summary>Normal None-security pass - generates full interfaces.</summary>
+    None,
+    /// <summary>Plugin-only classes - generates XPlugin : Roblox.Instance.</summary>
+    PluginOnly,
+    /// <summary>Extension interfaces for mixed classes - generates XPlugin : Roblox.X with plugin members.</summary>
+    PluginExtension
+}
+
 /// <summary>
 /// Base class providing Roslyn SyntaxFactory helpers for code generation.
 /// </summary>
@@ -40,35 +49,39 @@ public abstract class GeneratorBase {
     public static string MapType(ApiValueType? type) {
         if (type == null) return "void";
 
-        // First check for special types that need mapping regardless of category
-        string? special = MapSpecialType(type.Name);
-        if (special != null) return special;
+        string typeName = type.Name;
+        bool isNullable = typeName.EndsWith("?");
+        string baseName = isNullable ? typeName[..^1] : typeName;
 
-        return type.Category switch {
-            "Primitive" => MapPrimitiveType(type.Name),
-            "DataType" => MapDataType(type.Name),
-            "Enum" => MapEnumType(type.Name),
-            "Class" => MapClassName(type.Name),
-            "Group" => MapGroupType(type.Name),
+        // First check for special types that need mapping regardless of category
+        string? special = MapSpecialTypeBase(baseName);
+        if (special != null) {
+            return isNullable ? special + "?" : special;
+        }
+
+        string result = type.Category switch {
+            "Primitive" => MapPrimitiveType(baseName),
+            "DataType" => MapDataType(baseName),
+            "Enum" => MapEnumType(baseName),
+            "Class" => MapClassName(baseName),
+            "Group" => MapGroupType(baseName),
             _ => "object"
         };
+
+        // Reapply nullable suffix if the result is a valid type (not object)
+        if (isNullable && result != "object" && !result.EndsWith("?")) {
+            result += "?";
+        }
+        return result;
     }
 
-    private static string? MapSpecialType(string name) {
-        bool isNullable = name.EndsWith("?");
-        string baseName = isNullable ? name[..^1] : name;
-
-        string? result = baseName switch {
+    private static string? MapSpecialTypeBase(string baseName) {
+        return baseName switch {
             "Function" => "object",
             "function" => "object",
             "SharedTable" => "object",
             _ => null
         };
-
-        if (result != null && isNullable) {
-            return result + "?";
-        }
-        return result;
     }
 
     private static string MapClassName(string name) => name switch {
@@ -147,8 +160,12 @@ public abstract class GeneratorBase {
     };
 
     private static string MapEnumType(string name) {
+        // Strip "Enum." prefix if present - enums are at top level in C#
+        // Note: Roblox uses Enum.Material in Lua, but C# cannot use "Enum" as a class name
+        // (conflicts with System.Enum). The transpiler maps Material.Plastic -> Enum.Material.Plastic
+        // in LuaSyntaxNodeTransform.cs (see IsRobloxEnumItemType).
         if (name.StartsWith("Enum.")) {
-            return name[5..];
+            name = name[5..];
         }
         return name;
     }

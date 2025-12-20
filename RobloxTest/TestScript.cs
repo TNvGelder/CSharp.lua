@@ -1,5 +1,4 @@
 using Roblox;
-using static Roblox.Globals;
 
 namespace RobloxTest;
 
@@ -10,7 +9,8 @@ namespace RobloxTest;
 public class TestScript {
     public static void Main() {
         // Test GetService with generic type argument -> should become game:GetService("Players")
-        var players = game.GetService<Players>();
+        // Use explicit Globals.game to ensure XML templates are applied
+        var players = Globals.game.GetService<Players>();
 
         // Test event connection with lambda
         players.PlayerAdded.Connect(player => {
@@ -35,8 +35,8 @@ public class TestScript {
             });
         });
 
-        // Test workspace global
-        var part = workspace.FindFirstChild("TestPart");
+        // Test workspace global (use explicit Globals.workspace)
+        var part = Globals.workspace.FindFirstChild("TestPart");
         if (part != null) {
             // Test IsA with generic -> should become :IsA("BasePart")
             if (part.IsA<BasePart>()) {
@@ -63,7 +63,7 @@ public class TestScript {
 /// </summary>
 public class ServerScript {
     public static void Initialize() {
-        var runService = game.GetService<RunService>();
+        var runService = Globals.game.GetService<RunService>();
 
         // Test RunService events
         runService.Heartbeat.Connect(deltaTime => {
@@ -89,7 +89,7 @@ public class PhysicsTest {
         var params_ = RaycastParams.@new();
 
         // Perform raycast
-        var result = workspace.Raycast(origin, direction, params_);
+        var result = Globals.workspace.Raycast(origin, direction, params_);
         if (result != null) {
             System.Console.WriteLine($"Hit: {result.Instance.Name}");
             System.Console.WriteLine($"Position: {result.Position}");

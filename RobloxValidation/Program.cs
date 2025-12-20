@@ -94,12 +94,15 @@ public class Program {
         var launcherProject = Path.Combine(ProjectRoot, "CSharp.lua.Launcher", "CSharp.lua.Launcher.csproj");
         var robloxTypesLib = Path.Combine(ProjectRoot, "RobloxTypes", "bin", "Debug", "net9.0", "RobloxTypes.dll");
         var metadataFile = Path.Combine(ProjectRoot, "RobloxMetadata", "Roblox.xml");
+        var generatedMetadata = Path.Combine(ProjectRoot, "RobloxMetadata", "Roblox.Generated.xml");
 
+        // Multiple metadata files are separated with semicolons
+        var metadataPaths = $"\"{metadataFile}\";\"{generatedMetadata}\"";
         var arguments = $"run --project \"{launcherProject}\" -- " +
             $"-s \"{sourceDir}\" " +
             $"-d \"{outputDir}\" " +
             $"-l \"{robloxTypesLib}\" " +
-            $"-m \"{metadataFile}\" " +
+            $"-m {metadataPaths} " +
             $"-roblox -namespace RobloxValidation.Runtime";
 
         var process = new Process {

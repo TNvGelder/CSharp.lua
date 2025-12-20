@@ -1007,10 +1007,17 @@ namespace CSharpLua {
         }
       }
 
+      // Resolve namespace path through configured root when SystemNamespace is set
+      string resolvedPath = null;
+      if (!string.IsNullOrEmpty(SystemNamespace)) {
+        resolvedPath = $"_G.{SystemNamespace}.{prefix}";
+      }
+
       CurCompilationUnit.UsingDeclares.Add(new UsingDeclare {
         Prefix = prefix,
         NewPrefix = newPrefix,
         IsFromCode = isFromCode,
+        ResolvedPath = resolvedPath,
       });
       return true;
     }
@@ -1026,6 +1033,13 @@ namespace CSharpLua {
             if (!IsLocalVarExistsInCurMethod(newPrefix)) {
               bool success = AddImport(prefix, newPrefix, symbol.IsFromCode());
               if (success) {
+                // Mark the import as actually used since this type reference will appear in output
+                // Exception: Roblox enum types are transformed to use Enum.* in output, not Roblox.*
+                // so don't mark Roblox namespace as used for enum types
+                bool isRobloxEnumType = IsRoblox && IsRobloxEnumItemType(symbol);
+                if (!isRobloxEnumType) {
+                  CurCompilationUnit.MarkUsingDeclareAsUsed(prefix);
+                }
                 string newName = newPrefix + name[pos..];
                 return new LuaImportNameSyntax(newName, name);
               }

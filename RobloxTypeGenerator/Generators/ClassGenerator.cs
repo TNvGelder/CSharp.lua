@@ -9,8 +9,10 @@ public class ClassGenerator : GeneratorBase {
     private readonly List<ApiClass> _classes;
     private readonly Dictionary<string, ApiDocEntry> _docs;
     private readonly SecurityLevel _securityLevel;
+    private readonly PluginGenerationMode _pluginMode;
+    private readonly string _namespaceName;
     private readonly HashSet<string> _classNames;
-    private readonly HashSet<string> _additionalSkipClasses;
+    private readonly HashSet<string> _nonePassClasses;
     private readonly HashSet<string> _generatedClasses = new();
 
     // Reference shared skip list from Constants.cs
@@ -20,13 +22,17 @@ public class ClassGenerator : GeneratorBase {
         List<ApiClass> classes,
         Dictionary<string, ApiDocEntry> docs,
         SecurityLevel securityLevel,
-        HashSet<string>? additionalSkipClasses = null) {
+        PluginGenerationMode pluginMode = PluginGenerationMode.None,
+        string namespaceName = "Roblox",
+        HashSet<string>? nonePassClasses = null) {
 
         _classes = classes;
         _docs = docs;
         _securityLevel = securityLevel;
+        _pluginMode = pluginMode;
+        _namespaceName = namespaceName;
         _classNames = classes.Select(c => c.Name).ToHashSet();
-        _additionalSkipClasses = additionalSkipClasses ?? new();
+        _nonePassClasses = nonePassClasses ?? new();
     }
 
     /// <summary>
@@ -37,36 +43,163 @@ public class ClassGenerator : GeneratorBase {
     public CompilationUnitSyntax Generate() {
         var members = new List<MemberDeclarationSyntax>();
 
-        // Filter and sort classes
-        var filteredClasses = _classes
-            .Where(c => !SkipClasses.Contains(c.Name))
-            .Where(c => !_additionalSkipClasses.Contains(c.Name))
-            .Where(c => _securityLevel == SecurityLevel.None || ShouldGenerateClass(c, _securityLevel))
-            .OrderBy(c => c.Name)
-            .ToList();
+        // Filter classes based on mode:
+        // - None mode: skip hand-written classes (they're in RobloxTypes/*.cs)
+        // - Plugin mode: include hand-written classes so we can generate extension interfaces for plugin members
+        var filteredClasses = _pluginMode == PluginGenerationMode.None
+            ? _classes.Where(c => !SkipClasses.Contains(c.Name)).OrderBy(c => c.Name).ToList()
+            : _classes.Where(c => c.Name != "<<<ROOT>>>").OrderBy(c => c.Name).ToList();
+
+        // For None mode: first identify required types that need stub interfaces
+        if (_pluginMode == PluginGenerationMode.None) {
+            // First pass: identify all classes that will be generated
+            var classesToGenerate = new HashSet<string>();
+            foreach (var cls in filteredClasses) {
+                bool hasNoneMembers = cls.Members.Any(m => ShouldGenerateMember(m, SecurityLevel.None));
+                if (hasNoneMembers) {
+                    classesToGenerate.Add(cls.Name);
+                }
+            }
+
+            // Second pass: identify required types (base types + referenced types)
+            var requiredTypes = new HashSet<string>();
+
+            void AddRequiredType(string? typeName) {
+                if (string.IsNullOrEmpty(typeName) ||
+                    typeName == "<<<ROOT>>>" ||
+                    !_classNames.Contains(typeName) ||
+                    classesToGenerate.Contains(typeName) ||
+                    requiredTypes.Contains(typeName) ||
+                    SkipClasses.Contains(typeName)) {
+                    return;
+                }
+                requiredTypes.Add(typeName);
+            }
+
+            // Check classes that will be generated for referenced types
+            foreach (var cls in filteredClasses) {
+                if (classesToGenerate.Contains(cls.Name)) {
+                    // Add superclass
+                    AddRequiredType(cls.Superclass);
+
+                    // Check members for referenced types
+                    foreach (var member in cls.Members) {
+                        if (!ShouldGenerateMember(member, SecurityLevel.None)) continue;
+
+                        // Property/return types
+                        if (member.ValueType?.Category == "Class") {
+                            AddRequiredType(member.ValueType.Name?.TrimEnd('?'));
+                        }
+                        if (member.ReturnType?.Category == "Class") {
+                            AddRequiredType(member.ReturnType.Name?.TrimEnd('?'));
+                        }
+
+                        // Parameter types
+                        foreach (var param in member.Parameters) {
+                            if (param.Type?.Category == "Class") {
+                                AddRequiredType(param.Type.Name?.TrimEnd('?'));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Recursively add base types of required types
+            bool addedNew;
+            do {
+                addedNew = false;
+                foreach (var typeName in requiredTypes.ToList()) {
+                    var cls = _classes.FirstOrDefault(c => c.Name == typeName);
+                    if (cls != null) {
+                        string? superclass = cls.Superclass;
+                        if (!string.IsNullOrEmpty(superclass) &&
+                            superclass != "<<<ROOT>>>" &&
+                            _classNames.Contains(superclass) &&
+                            !classesToGenerate.Contains(superclass) &&
+                            !requiredTypes.Contains(superclass) &&
+                            !SkipClasses.Contains(superclass)) {
+                            requiredTypes.Add(superclass);
+                            addedNew = true;
+                        }
+                    }
+                }
+            } while (addedNew);
+
+            // Generate stub interfaces for required types
+            foreach (var typeName in requiredTypes.OrderBy(n => n)) {
+                var cls = _classes.First(c => c.Name == typeName);
+                var stub = GenerateStubInterface(cls);
+                if (stub != null) {
+                    members.Add(stub);
+                    _generatedClasses.Add(cls.Name);
+                }
+            }
+        }
 
         foreach (var cls in filteredClasses) {
-            var interfaceDecl = GenerateClass(cls);
-            if (interfaceDecl != null) {
-                members.Add(interfaceDecl);
-                _generatedClasses.Add(cls.Name);
+            bool hasNoneMembers = cls.Members.Any(m => ShouldGenerateMember(m, SecurityLevel.None));
+            bool hasPluginMembers = cls.Members.Any(m => ShouldGenerateMember(m, SecurityLevel.PluginSecurity));
+
+            if (_pluginMode == PluginGenerationMode.None) {
+                // Normal None-security pass: generate full interfaces for classes with None-level members
+                if (hasNoneMembers) {
+                    var interfaceDecl = GenerateClass(cls);
+                    if (interfaceDecl != null) {
+                        members.Add(interfaceDecl);
+                        _generatedClasses.Add(cls.Name);
+                    }
+                }
+            } else {
+                // Plugin pass: generate for classes with plugin members
+                if (hasPluginMembers) {
+                    // Check if base class exists (generated in None pass, or hand-written)
+                    bool baseClassExists = hasNoneMembers || _nonePassClasses.Contains(cls.Name) || SkipClasses.Contains(cls.Name);
+
+                    if (baseClassExists) {
+                        // Mixed class or hand-written class: generate extension interface (XPlugin : Roblox.X)
+                        var extensionDecl = GeneratePluginExtension(cls);
+                        if (extensionDecl != null) {
+                            members.Add(extensionDecl);
+                            _generatedClasses.Add(cls.Name + "Plugin");
+                        }
+                    } else {
+                        // Plugin-only class: generate full interface (X : Roblox.Instance, no Plugin suffix)
+                        var interfaceDecl = GeneratePluginOnlyClass(cls);
+                        if (interfaceDecl != null) {
+                            members.Add(interfaceDecl);
+                            _generatedClasses.Add(cls.Name);  // No suffix for plugin-only classes
+                        }
+                    }
+                }
             }
         }
 
         // Create namespace
-        var namespaceDecl = FileScopedNamespaceDeclaration(IdentifierName("Roblox"))
+        var namespaceDecl = FileScopedNamespaceDeclaration(IdentifierName(_namespaceName))
             .WithMembers(List(members));
 
-        // Create compilation unit with header
-        var compilationUnit = CompilationUnit()
+        // Create compilation unit
+        var compilationUnit = CompilationUnit();
+
+        // For plugin namespace, add using directive for base Roblox types
+        if (_namespaceName != "Roblox") {
+            compilationUnit = compilationUnit.WithUsings(SingletonList(
+                UsingDirective(IdentifierName("Roblox"))));
+        }
+
+        compilationUnit = compilationUnit
             .WithMembers(SingletonList<MemberDeclarationSyntax>(namespaceDecl))
-            .WithLeadingTrivia(CreateFileHeader())
             .NormalizeWhitespace();
+
+        // Apply header AFTER NormalizeWhitespace (which would strip it otherwise)
+        compilationUnit = compilationUnit.WithLeadingTrivia(CreateFileHeader());
 
         return compilationUnit;
     }
 
     private static SyntaxTriviaList CreateFileHeader() {
+        // Use pre-formatted strings for preprocessor directives to ensure proper spacing
+        // Roslyn's structured trivia doesn't preserve whitespace correctly after NormalizeWhitespace
         return TriviaList(
             Comment("// <auto-generated>"),
             CarriageReturnLineFeed,
@@ -77,13 +210,11 @@ public class ClassGenerator : GeneratorBase {
             Comment("// </auto-generated>"),
             CarriageReturnLineFeed,
             CarriageReturnLineFeed,
-            Trivia(NullableDirectiveTrivia(Token(SyntaxKind.EnableKeyword), true)),
+            Trivia(ParseLeadingTrivia("#nullable enable\n").First().GetStructure() as NullableDirectiveTriviaSyntax
+                ?? NullableDirectiveTrivia(Token(SyntaxKind.EnableKeyword), true)),
             CarriageReturnLineFeed,
-            Trivia(PragmaWarningDirectiveTrivia(
-                Token(SyntaxKind.DisableKeyword),
-                SingletonSeparatedList<ExpressionSyntax>(
-                    IdentifierName("CS0108")),
-                true)),
+            Trivia(ParseLeadingTrivia("#pragma warning disable CS0108\n").First().GetStructure() as PragmaWarningDirectiveTriviaSyntax
+                ?? PragmaWarningDirectiveTrivia(Token(SyntaxKind.DisableKeyword), SingletonSeparatedList<ExpressionSyntax>(IdentifierName("CS0108")), true)),
             CarriageReturnLineFeed,
             CarriageReturnLineFeed
         );
@@ -138,6 +269,132 @@ public class ClassGenerator : GeneratorBase {
         return interfaceDecl;
     }
 
+    /// <summary>
+    /// Generates a plugin extension interface for a mixed class (has both None and Plugin members).
+    /// The extension inherits from the base Roblox class and adds plugin-only members.
+    /// </summary>
+    private InterfaceDeclarationSyntax? GeneratePluginExtension(ApiClass cls) {
+        // Only include plugin-security members
+        var pluginMembers = cls.Members
+            .Where(m => ShouldGenerateMember(m, SecurityLevel.PluginSecurity))
+            .OrderBy(m => m.MemberType)
+            .ThenBy(m => m.Name)
+            .ToList();
+
+        if (pluginMembers.Count == 0) return null;
+
+        // Generate interface members
+        var members = new List<MemberDeclarationSyntax>();
+        foreach (var member in pluginMembers) {
+            var memberSyntax = GenerateMember(cls.Name, member);
+            if (memberSyntax != null) {
+                members.Add(memberSyntax);
+            }
+        }
+
+        if (members.Count == 0) return null;
+
+        // Name: {ClassName}Plugin, inherits from base class in Roblox namespace
+        string safeName = MakeSafeIdentifierString(cls.Name) + "Plugin";
+        string baseTypeName = "global::Roblox." + MakeSafeIdentifierString(cls.Name);
+
+        var interfaceDecl = InterfaceDeclaration(safeName)
+            .WithModifiers(TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.PartialKeyword)))
+            .WithBaseList(BaseList(SingletonSeparatedList<BaseTypeSyntax>(
+                SimpleBaseType(ParseTypeName(baseTypeName)))))
+            .WithMembers(List(members))
+            .WithLeadingTrivia(CreateDocComment($"Plugin extension for {cls.Name}. Provides plugin-only members."));
+
+        // Add Obsolete attribute if deprecated
+        if (cls.Tags.Contains("Deprecated")) {
+            interfaceDecl = interfaceDecl.WithAttributeLists(
+                SingletonList(ObsoleteAttribute("This class is deprecated.")));
+        }
+
+        return interfaceDecl;
+    }
+
+    /// <summary>
+    /// Generates a full plugin-only class (class has only Plugin security members, no None members).
+    /// </summary>
+    private InterfaceDeclarationSyntax? GeneratePluginOnlyClass(ApiClass cls) {
+        // Only include plugin-security members
+        var pluginMembers = cls.Members
+            .Where(m => ShouldGenerateMember(m, SecurityLevel.PluginSecurity))
+            .OrderBy(m => m.MemberType)
+            .ThenBy(m => m.Name)
+            .ToList();
+
+        if (pluginMembers.Count == 0) return null;
+
+        // Generate interface members
+        var members = new List<MemberDeclarationSyntax>();
+        foreach (var member in pluginMembers) {
+            var memberSyntax = GenerateMember(cls.Name, member);
+            if (memberSyntax != null) {
+                members.Add(memberSyntax);
+            }
+        }
+
+        if (members.Count == 0) return null;
+
+        // Name: {ClassName} (no Plugin suffix - these are new types, not extensions)
+        // Inherits from Roblox.Instance
+        string safeName = MakeSafeIdentifierString(cls.Name);
+
+        var interfaceDecl = InterfaceDeclaration(safeName)
+            .WithModifiers(TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.PartialKeyword)))
+            .WithBaseList(BaseList(SingletonSeparatedList<BaseTypeSyntax>(
+                SimpleBaseType(ParseTypeName("global::Roblox.Instance")))))
+            .WithMembers(List(members))
+            .WithLeadingTrivia(GetClassDocComment(cls));
+
+        // Add Obsolete attribute if deprecated
+        if (cls.Tags.Contains("Deprecated")) {
+            interfaceDecl = interfaceDecl.WithAttributeLists(
+                SingletonList(ObsoleteAttribute("This class is deprecated.")));
+        }
+
+        return interfaceDecl;
+    }
+
+    /// <summary>
+    /// Generates a stub interface for a base type that has no None-security members
+    /// but is required by subclasses in the inheritance chain.
+    /// </summary>
+    private InterfaceDeclarationSyntax GenerateStubInterface(ApiClass cls) {
+        string safeName = MakeSafeIdentifierString(cls.Name);
+
+        var interfaceDecl = InterfaceDeclaration(safeName)
+            .WithModifiers(TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.PartialKeyword)));
+
+        // Add base type
+        var baseType = GetBaseType(cls);
+        if (baseType != null) {
+            interfaceDecl = interfaceDecl.WithBaseList(
+                BaseList(SingletonSeparatedList<BaseTypeSyntax>(
+                    SimpleBaseType(IdentifierName(baseType)))));
+        }
+
+        // Add documentation
+        interfaceDecl = interfaceDecl.WithLeadingTrivia(
+            CreateDocComment($"Base type for {cls.Name} hierarchy."));
+
+        // Add Obsolete attribute if deprecated
+        if (cls.Tags.Contains("Deprecated")) {
+            interfaceDecl = interfaceDecl.WithAttributeLists(
+                SingletonList(ObsoleteAttribute("This class is deprecated.")));
+        }
+
+        return interfaceDecl;
+    }
+
     private string? GetBaseType(ApiClass cls) {
         if (!string.IsNullOrEmpty(cls.Superclass) &&
             cls.Superclass != "<<<ROOT>>>" &&
@@ -170,7 +427,7 @@ public class ClassGenerator : GeneratorBase {
         };
     }
 
-    private PropertyDeclarationSyntax GenerateProperty(string className, ApiMember member) {
+    private PropertyDeclarationSyntax? GenerateProperty(string className, ApiMember member) {
         string typeName = MapType(member.ValueType);
 
         // Make class-typed properties nullable (like RobloxTS does)
@@ -182,13 +439,25 @@ public class ClassGenerator : GeneratorBase {
         var type = ParseTypeString(typeName);
         string safeName = MakeSafeIdentifierString(member.Name);
 
-        // Create accessors based on read/write permissions
+        // Check accessor security - setter may require higher security than getter
+        string readSecurity = member.GetReadSecurity();
+        string writeSecurity = member.GetWriteSecurity();
+
+        bool canRead = !member.IsWriteOnly && CanAccessAtSecurityLevel(readSecurity, _securityLevel);
+        bool canWrite = !member.IsReadOnly && CanAccessAtSecurityLevel(writeSecurity, _securityLevel);
+
+        // Skip if neither accessor is available at this security level
+        if (!canRead && !canWrite) {
+            return null;
+        }
+
+        // Create accessors based on read/write permissions and security
         var accessors = new List<AccessorDeclarationSyntax>();
-        if (!member.IsWriteOnly) {
+        if (canRead) {
             accessors.Add(AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
                 .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)));
         }
-        if (!member.IsReadOnly) {
+        if (canWrite) {
             accessors.Add(AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
                 .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)));
         }
@@ -207,6 +476,17 @@ public class ClassGenerator : GeneratorBase {
         }
 
         return property;
+    }
+
+    /// <summary>
+    /// Checks if a member is accessible at the given security level.
+    /// </summary>
+    private static bool CanAccessAtSecurityLevel(string memberSecurity, SecurityLevel currentLevel) {
+        return currentLevel switch {
+            SecurityLevel.None => memberSecurity == "None",
+            SecurityLevel.PluginSecurity => memberSecurity == "None" || memberSecurity == "PluginSecurity",
+            _ => false
+        };
     }
 
     private MethodDeclarationSyntax GenerateFunction(string className, ApiMember member) {

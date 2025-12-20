@@ -20,6 +20,20 @@
       </class>
 
       <!-- ============================================================ -->
+      <!-- EnumItem base class - for enum values -->
+      <!-- NOTE: Field access is handled by transpiler (IsRobloxEnumItemType check), -->
+      <!-- but metadata is kept as documentation and fallback -->
+      <!-- ============================================================ -->
+      <class name="EnumItem">
+        <property name="Name" IsField="true">
+          <get Template="{this}.Name" />
+        </property>
+        <property name="Value" IsField="true">
+          <get Template="{this}.Value" />
+        </property>
+      </class>
+
+      <!-- ============================================================ -->
       <!-- Instance base interface -->
       <!-- ============================================================ -->
       <class name="Instance">
