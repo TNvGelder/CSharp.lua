@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8"?>
+<meta>
+  <assembly>
+    <namespace name="Roblox">
+      <!-- ============================================================ -->
+      <!-- InstanceFactory - creates new instances -->
+      <!-- ============================================================ -->
+      <class name="InstanceFactory">
+        <method name="Create" GenericArgCount="1" ArgCount="0" Template="Instance.new({`0Name})" />
+        <method name="Create" GenericArgCount="1" ArgCount="1" Template="Instance.new({`0Name}, {0})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Globals -->
+      <!-- ============================================================ -->
+      <class name="Globals">
+        <property name="game"><get Template="game" /></property>
+        <property name="workspace"><get Template="workspace" /></property>
+        <property name="script"><get Template="script" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Instance base interface -->
+      <!-- ============================================================ -->
+      <class name="Instance">
+        <property name="Name" IsField="true">
+          <get Template="{this}.Name" />
+        </property>
+        <property name="Parent" IsField="true">
+          <get Template="{this}.Parent" />
+        </property>
+        <property name="ClassName" IsField="true">
+          <get Template="{this}.ClassName" />
+        </property>
+
+        <!-- FindFirstChild -->
+        <method name="FindFirstChild" ArgCount="1" Template="{this}:FindFirstChild({0})" />
+        <method name="FindFirstChild" ArgCount="2" Template="{this}:FindFirstChild({0}, {1})" />
+        <method name="FindFirstChild" GenericArgCount="1" ArgCount="1" Template="{this}:FindFirstChild({0})" />
+        <method name="FindFirstChild" GenericArgCount="1" ArgCount="2" Template="{this}:FindFirstChild({0}, {1})" />
+
+        <!-- FindFirstChildOfClass -->
+        <method name="FindFirstChildOfClass" ArgCount="1" Template="{this}:FindFirstChildOfClass({0})" />
+        <method name="FindFirstChildOfClass" GenericArgCount="1" ArgCount="0" Template="{this}:FindFirstChildOfClass({`0Name})" />
+
+        <!-- FindFirstChildWhichIsA -->
+        <method name="FindFirstChildWhichIsA" ArgCount="1" Template="{this}:FindFirstChildWhichIsA({0})" />
+        <method name="FindFirstChildWhichIsA" GenericArgCount="1" ArgCount="0" Template="{this}:FindFirstChildWhichIsA({`0Name})" />
+
+        <!-- FindFirstAncestor -->
+        <method name="FindFirstAncestor" ArgCount="1" Template="{this}:FindFirstAncestor({0})" />
+        <method name="FindFirstAncestorOfClass" ArgCount="1" Template="{this}:FindFirstAncestorOfClass({0})" />
+        <method name="FindFirstAncestorWhichIsA" ArgCount="1" Template="{this}:FindFirstAncestorWhichIsA({0})" />
+
+        <!-- Hierarchy -->
+        <method name="GetChildren" Template="{this}:GetChildren()" />
+        <method name="GetDescendants" Template="{this}:GetDescendants()" />
+        <method name="Destroy" Template="{this}:Destroy()" />
+        <method name="Clone" Template="{this}:Clone()" />
+
+        <!-- IsA -->
+        <method name="IsA" ArgCount="1" Template="{this}:IsA({0})" />
+        <method name="IsA" GenericArgCount="1" ArgCount="0" Template="{this}:IsA({`0Name})" />
+
+        <method name="IsAncestorOf" ArgCount="1" Template="{this}:IsAncestorOf({0})" />
+        <method name="IsDescendantOf" ArgCount="1" Template="{this}:IsDescendantOf({0})" />
+
+        <!-- WaitForChild -->
+        <method name="WaitForChild" ArgCount="1" Template="{this}:WaitForChild({0})" />
+        <method name="WaitForChild" ArgCount="2" Template="{this}:WaitForChild({0}, {1})" />
+
+        <!-- Attributes -->
+        <method name="GetAttribute" ArgCount="1" Template="{this}:GetAttribute({0})" />
+        <method name="SetAttribute" ArgCount="2" Template="{this}:SetAttribute({0}, {1})" />
+        <method name="GetAttributes" Template="{this}:GetAttributes()" />
+
+        <!-- Events -->
+        <property name="ChildAdded"><get Template="{this}.ChildAdded" /></property>
+        <property name="ChildRemoved"><get Template="{this}.ChildRemoved" /></property>
+        <property name="DescendantAdded"><get Template="{this}.DescendantAdded" /></property>
+        <property name="DescendantRemoving"><get Template="{this}.DescendantRemoving" /></property>
+        <property name="AttributeChanged"><get Template="{this}.AttributeChanged" /></property>
+        <property name="Destroying"><get Template="{this}.Destroying" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- DataModel -->
+      <!-- ============================================================ -->
+      <class name="DataModel">
+        <method name="GetService" GenericArgCount="1" ArgCount="0" Template="{this}:GetService({`0Name})" />
+        <method name="FindService" ArgCount="1" Template="{this}:FindService({0})" />
+        <property name="GameId"><get Template="{this}.GameId" /></property>
+        <property name="PlaceId"><get Template="{this}.PlaceId" /></property>
+        <property name="PlaceVersion"><get Template="{this}.PlaceVersion" /></property>
+        <property name="JobId"><get Template="{this}.JobId" /></property>
+        <property name="CreatorType"><get Template="{this}.CreatorType" /></property>
+        <property name="CreatorId"><get Template="{this}.CreatorId" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Players Service -->
+      <!-- ============================================================ -->
+      <class name="Players">
+        <property name="LocalPlayer"><get Template="{this}.LocalPlayer" /></property>
+        <property name="MaxPlayers"><get Template="{this}.MaxPlayers" /></property>
+        <property name="PlayerAdded"><get Template="{this}.PlayerAdded" /></property>
+        <property name="PlayerRemoving"><get Template="{this}.PlayerRemoving" /></property>
+        <method name="GetPlayers" Template="{this}:GetPlayers()" />
+        <method name="GetPlayerByUserId" ArgCount="1" Template="{this}:GetPlayerByUserId({0})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Player -->
+      <!-- ============================================================ -->
+      <class name="Player">
+        <property name="UserId"><get Template="{this}.UserId" /></property>
+        <property name="DisplayName"><get Template="{this}.DisplayName" /></property>
+        <property name="Team" IsField="true"><get Template="{this}.Team" /></property>
+        <property name="Character" IsField="true"><get Template="{this}.Character" /></property>
+        <property name="CharacterAdded"><get Template="{this}.CharacterAdded" /></property>
+        <property name="CharacterRemoving"><get Template="{this}.CharacterRemoving" /></property>
+        <property name="Backpack"><get Template="{this}.Backpack" /></property>
+        <property name="PlayerGui"><get Template="{this}.PlayerGui" /></property>
+        <method name="Kick" ArgCount="0" Template="{this}:Kick()" />
+        <method name="Kick" ArgCount="1" Template="{this}:Kick({0})" />
+        <method name="LoadCharacter" Template="{this}:LoadCharacter()" />
+        <method name="DistanceFromCharacter" ArgCount="1" Template="{this}:DistanceFromCharacter({0})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Workspace -->
+      <!-- ============================================================ -->
+      <class name="Workspace">
+        <property name="CurrentCamera" IsField="true"><get Template="{this}.CurrentCamera" /></property>
+        <property name="Terrain"><get Template="{this}.Terrain" /></property>
+        <property name="DistributedGameTime"><get Template="{this}.DistributedGameTime" /></property>
+        <property name="Gravity" IsField="true"><get Template="{this}.Gravity" /></property>
+        <method name="GetPartBoundsInBox" ArgCount="2" Template="{this}:GetPartBoundsInBox({0}, {1})" />
+        <method name="Raycast" ArgCount="2" Template="{this}:Raycast({0}, {1})" />
+        <method name="Raycast" ArgCount="3" Template="{this}:Raycast({0}, {1}, {2})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- PVInstance / BasePart / Part -->
+      <!-- ============================================================ -->
+      <class name="PVInstance">
+        <method name="GetPivot" Template="{this}:GetPivot()" />
+        <method name="PivotTo" ArgCount="1" Template="{this}:PivotTo({0})" />
+      </class>
+
+      <class name="BasePart">
+        <property name="Anchored" IsField="true"><get Template="{this}.Anchored" /></property>
+        <property name="CanCollide" IsField="true"><get Template="{this}.CanCollide" /></property>
+        <property name="CanQuery" IsField="true"><get Template="{this}.CanQuery" /></property>
+        <property name="CanTouch" IsField="true"><get Template="{this}.CanTouch" /></property>
+        <property name="Position" IsField="true"><get Template="{this}.Position" /></property>
+        <property name="Orientation" IsField="true"><get Template="{this}.Orientation" /></property>
+        <property name="Size" IsField="true"><get Template="{this}.Size" /></property>
+        <property name="CFrame" IsField="true"><get Template="{this}.CFrame" /></property>
+        <property name="Color" IsField="true"><get Template="{this}.Color" /></property>
+        <property name="Transparency" IsField="true"><get Template="{this}.Transparency" /></property>
+        <property name="Reflectance" IsField="true"><get Template="{this}.Reflectance" /></property>
+        <property name="Material" IsField="true"><get Template="{this}.Material" /></property>
+        <property name="BrickColor" IsField="true"><get Template="{this}.BrickColor" /></property>
+        <property name="Massless" IsField="true"><get Template="{this}.Massless" /></property>
+        <property name="Mass"><get Template="{this}.Mass" /></property>
+        <property name="AssemblyLinearVelocity" IsField="true"><get Template="{this}.AssemblyLinearVelocity" /></property>
+        <property name="AssemblyAngularVelocity" IsField="true"><get Template="{this}.AssemblyAngularVelocity" /></property>
+        <property name="Touched"><get Template="{this}.Touched" /></property>
+        <property name="TouchEnded"><get Template="{this}.TouchEnded" /></property>
+        <method name="GetTouchingParts" Template="{this}:GetTouchingParts()" />
+        <method name="GetConnectedParts" ArgCount="0" Template="{this}:GetConnectedParts()" />
+        <method name="GetConnectedParts" ArgCount="1" Template="{this}:GetConnectedParts({0})" />
+        <method name="ApplyImpulse" ArgCount="1" Template="{this}:ApplyImpulse({0})" />
+        <method name="ApplyImpulseAtPosition" ArgCount="2" Template="{this}:ApplyImpulseAtPosition({0}, {1})" />
+        <method name="ApplyAngularImpulse" ArgCount="1" Template="{this}:ApplyAngularImpulse({0})" />
+        <method name="SetNetworkOwner" ArgCount="0" Template="{this}:SetNetworkOwner()" />
+        <method name="SetNetworkOwner" ArgCount="1" Template="{this}:SetNetworkOwner({0})" />
+        <method name="GetNetworkOwner" Template="{this}:GetNetworkOwner()" />
+      </class>
+
+      <class name="Model">
+        <property name="PrimaryPart" IsField="true"><get Template="{this}.PrimaryPart" /></property>
+        <method name="GetBoundingBox" Template="{this}:GetBoundingBox()" />
+        <method name="MoveTo" ArgCount="1" Template="{this}:MoveTo({0})" />
+        <method name="ScaleTo" ArgCount="1" Template="{this}:ScaleTo({0})" />
+        <method name="GetScale" Template="{this}:GetScale()" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Humanoid -->
+      <!-- ============================================================ -->
+      <class name="Humanoid">
+        <property name="Health" IsField="true"><get Template="{this}.Health" /></property>
+        <property name="MaxHealth" IsField="true"><get Template="{this}.MaxHealth" /></property>
+        <property name="WalkSpeed" IsField="true"><get Template="{this}.WalkSpeed" /></property>
+        <property name="JumpPower" IsField="true"><get Template="{this}.JumpPower" /></property>
+        <property name="JumpHeight" IsField="true"><get Template="{this}.JumpHeight" /></property>
+        <property name="Jump" IsField="true"><get Template="{this}.Jump" /></property>
+        <property name="HumanoidStateType"><get Template="{this}.HumanoidStateType" /></property>
+        <property name="RootPart"><get Template="{this}.RootPart" /></property>
+        <property name="Died"><get Template="{this}.Died" /></property>
+        <property name="StateChanged"><get Template="{this}.StateChanged" /></property>
+        <property name="Running"><get Template="{this}.Running" /></property>
+        <property name="Jumping"><get Template="{this}.Jumping" /></property>
+        <method name="TakeDamage" ArgCount="1" Template="{this}:TakeDamage({0})" />
+        <method name="MoveTo" ArgCount="1" Template="{this}:MoveTo({0})" />
+        <method name="MoveTo" ArgCount="2" Template="{this}:MoveTo({0}, {1})" />
+        <method name="ChangeState" ArgCount="1" Template="{this}:ChangeState({0})" />
+        <method name="GetState" Template="{this}:GetState()" />
+        <method name="EquipTool" ArgCount="1" Template="{this}:EquipTool({0})" />
+        <method name="UnequipTools" Template="{this}:UnequipTools()" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- ScriptSignal / RBXScriptConnection -->
+      <!-- ============================================================ -->
+      <class name="ScriptSignal">
+        <method name="Connect" ArgCount="1" Template="{this}:Connect({0})" />
+        <method name="Wait" Template="{this}:Wait()" />
+      </class>
+
+      <class name="RBXScriptConnection">
+        <method name="Disconnect" Template="{this}:Disconnect()" />
+        <property name="Connected"><get Template="{this}.Connected" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Vector2 -->
+      <!-- ============================================================ -->
+      <class name="Vector2">
+        <method name="new" ArgCount="2" Template="Vector2.new({0}, {1})" />
+        <property name="zero"><get Template="Vector2.zero" /></property>
+        <property name="one"><get Template="Vector2.one" /></property>
+        <property name="xAxis"><get Template="Vector2.xAxis" /></property>
+        <property name="yAxis"><get Template="Vector2.yAxis" /></property>
+        <property name="X"><get Template="{this}.X" /></property>
+        <property name="Y"><get Template="{this}.Y" /></property>
+        <property name="Magnitude"><get Template="{this}.Magnitude" /></property>
+        <method name="GetUnit" Template="{this}.Unit" />
+        <method name="Dot" ArgCount="1" Template="{this}:Dot({0})" />
+        <method name="Cross" ArgCount="1" Template="{this}:Cross({0})" />
+        <method name="Lerp" ArgCount="2" Template="{this}:Lerp({0}, {1})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Vector3 -->
+      <!-- ============================================================ -->
+      <class name="Vector3">
+        <method name="new" ArgCount="3" Template="Vector3.new({0}, {1}, {2})" />
+        <method name="new" ArgCount="1" Template="Vector3.new({0})" />
+        <property name="zero"><get Template="Vector3.zero" /></property>
+        <property name="one"><get Template="Vector3.one" /></property>
+        <property name="xAxis"><get Template="Vector3.xAxis" /></property>
+        <property name="yAxis"><get Template="Vector3.yAxis" /></property>
+        <property name="zAxis"><get Template="Vector3.zAxis" /></property>
+        <property name="X"><get Template="{this}.X" /></property>
+        <property name="Y"><get Template="{this}.Y" /></property>
+        <property name="Z"><get Template="{this}.Z" /></property>
+        <property name="Magnitude"><get Template="{this}.Magnitude" /></property>
+        <method name="GetUnit" Template="{this}.Unit" />
+        <method name="Dot" ArgCount="1" Template="{this}:Dot({0})" />
+        <method name="Cross" ArgCount="1" Template="{this}:Cross({0})" />
+        <method name="Lerp" ArgCount="2" Template="{this}:Lerp({0}, {1})" />
+        <method name="Max" ArgCount="2" Template="Vector3.Max({0}, {1})" />
+        <method name="Min" ArgCount="2" Template="Vector3.Min({0}, {1})" />
+        <method name="Angle" ArgCount="1" Template="{this}:Angle({0})" />
+        <method name="Angle" ArgCount="2" Template="{this}:Angle({0}, {1})" />
+        <method name="FuzzyEq" ArgCount="1" Template="{this}:FuzzyEq({0})" />
+        <method name="FuzzyEq" ArgCount="2" Template="{this}:FuzzyEq({0}, {1})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- CFrame -->
+      <!-- ============================================================ -->
+      <class name="CFrame">
+        <method name="new" ArgCount="3" Template="CFrame.new({0}, {1}, {2})" />
+        <method name="new" ArgCount="1" Template="CFrame.new({0})" />
+        <method name="new" ArgCount="2" Template="CFrame.new({0}, {1})" />
+        <method name="new" ArgCount="7" Template="CFrame.new({0}, {1}, {2}, {3}, {4}, {5}, {6})" />
+        <property name="identity"><get Template="CFrame.identity" /></property>
+        <method name="fromEulerAnglesXYZ" ArgCount="3" Template="CFrame.fromEulerAnglesXYZ({0}, {1}, {2})" />
+        <method name="fromEulerAnglesYXZ" ArgCount="3" Template="CFrame.fromEulerAnglesYXZ({0}, {1}, {2})" />
+        <method name="fromAxisAngle" ArgCount="2" Template="CFrame.fromAxisAngle({0}, {1})" />
+        <method name="fromOrientation" ArgCount="3" Template="CFrame.fromOrientation({0}, {1}, {2})" />
+        <method name="lookAt" ArgCount="2" Template="CFrame.lookAt({0}, {1})" />
+        <method name="lookAt" ArgCount="3" Template="CFrame.lookAt({0}, {1}, {2})" />
+        <property name="Position"><get Template="{this}.Position" /></property>
+        <method name="GetRotation" Template="{this}.Rotation" />
+        <property name="X"><get Template="{this}.X" /></property>
+        <property name="Y"><get Template="{this}.Y" /></property>
+        <property name="Z"><get Template="{this}.Z" /></property>
+        <property name="LookVector"><get Template="{this}.LookVector" /></property>
+        <property name="RightVector"><get Template="{this}.RightVector" /></property>
+        <property name="UpVector"><get Template="{this}.UpVector" /></property>
+        <method name="Inverse" Template="{this}:Inverse()" />
+        <method name="Lerp" ArgCount="2" Template="{this}:Lerp({0}, {1})" />
+        <method name="PointToWorldSpace" ArgCount="1" Template="{this}:PointToWorldSpace({0})" />
+        <method name="PointToObjectSpace" ArgCount="1" Template="{this}:PointToObjectSpace({0})" />
+        <method name="VectorToWorldSpace" ArgCount="1" Template="{this}:VectorToWorldSpace({0})" />
+        <method name="VectorToObjectSpace" ArgCount="1" Template="{this}:VectorToObjectSpace({0})" />
+        <method name="ToEulerAnglesXYZ" Template="{this}:ToEulerAnglesXYZ()" />
+        <method name="ToEulerAnglesYXZ" Template="{this}:ToEulerAnglesYXZ()" />
+        <method name="ToOrientation" Template="{this}:ToOrientation()" />
+        <method name="ToAxisAngle" Template="{this}:ToAxisAngle()" />
+        <method name="GetComponents" Template="{this}:GetComponents()" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Color3 -->
+      <!-- ============================================================ -->
+      <class name="Color3">
+        <method name="new" ArgCount="3" Template="Color3.new({0}, {1}, {2})" />
+        <method name="fromRGB" ArgCount="3" Template="Color3.fromRGB({0}, {1}, {2})" />
+        <method name="fromHSV" ArgCount="3" Template="Color3.fromHSV({0}, {1}, {2})" />
+        <method name="fromHex" ArgCount="1" Template="Color3.fromHex({0})" />
+        <property name="R"><get Template="{this}.R" /></property>
+        <property name="G"><get Template="{this}.G" /></property>
+        <property name="B"><get Template="{this}.B" /></property>
+        <method name="Lerp" ArgCount="2" Template="{this}:Lerp({0}, {1})" />
+        <method name="ToHSV" Template="Color3.toHSV({this})" />
+        <method name="ToHex" Template="{this}:ToHex()" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- BrickColor -->
+      <!-- ============================================================ -->
+      <class name="BrickColor">
+        <method name="new" ArgCount="1" Template="BrickColor.new({0})" />
+        <method name="new" ArgCount="3" Template="BrickColor.new({0}, {1}, {2})" />
+        <method name="Random" Template="BrickColor.Random()" />
+        <method name="White" Template="BrickColor.White()" />
+        <method name="Black" Template="BrickColor.Black()" />
+        <method name="Red" Template="BrickColor.Red()" />
+        <method name="Green" Template="BrickColor.Green()" />
+        <method name="Blue" Template="BrickColor.Blue()" />
+        <method name="Yellow" Template="BrickColor.Yellow()" />
+        <property name="Name"><get Template="{this}.Name" /></property>
+        <property name="Number"><get Template="{this}.Number" /></property>
+        <property name="Color"><get Template="{this}.Color" /></property>
+        <property name="r"><get Template="{this}.r" /></property>
+        <property name="g"><get Template="{this}.g" /></property>
+        <property name="b"><get Template="{this}.b" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- UDim / UDim2 -->
+      <!-- ============================================================ -->
+      <class name="UDim">
+        <method name="new" ArgCount="2" Template="UDim.new({0}, {1})" />
+        <property name="Scale"><get Template="{this}.Scale" /></property>
+        <property name="Offset"><get Template="{this}.Offset" /></property>
+      </class>
+
+      <class name="UDim2">
+        <method name="new" ArgCount="4" Template="UDim2.new({0}, {1}, {2}, {3})" />
+        <method name="new" ArgCount="2" Template="UDim2.new({0}, {1})" />
+        <method name="fromScale" ArgCount="2" Template="UDim2.fromScale({0}, {1})" />
+        <method name="fromOffset" ArgCount="2" Template="UDim2.fromOffset({0}, {1})" />
+        <property name="X"><get Template="{this}.X" /></property>
+        <property name="Y"><get Template="{this}.Y" /></property>
+        <property name="Width"><get Template="{this}.Width" /></property>
+        <property name="Height"><get Template="{this}.Height" /></property>
+        <method name="Lerp" ArgCount="2" Template="{this}:Lerp({0}, {1})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- TweenInfo -->
+      <!-- ============================================================ -->
+      <class name="TweenInfo">
+        <method name="new" ArgCount="0" Template="TweenInfo.new()" />
+        <method name="new" ArgCount="1" Template="TweenInfo.new({0})" />
+        <method name="new" ArgCount="2" Template="TweenInfo.new({0}, {1})" />
+        <method name="new" ArgCount="3" Template="TweenInfo.new({0}, {1}, {2})" />
+        <method name="new" ArgCount="4" Template="TweenInfo.new({0}, {1}, {2}, {3})" />
+        <method name="new" ArgCount="5" Template="TweenInfo.new({0}, {1}, {2}, {3}, {4})" />
+        <method name="new" ArgCount="6" Template="TweenInfo.new({0}, {1}, {2}, {3}, {4}, {5})" />
+        <property name="Time"><get Template="{this}.Time" /></property>
+        <property name="EasingStyle"><get Template="{this}.EasingStyle" /></property>
+        <property name="EasingDirection"><get Template="{this}.EasingDirection" /></property>
+        <property name="RepeatCount"><get Template="{this}.RepeatCount" /></property>
+        <property name="Reverses"><get Template="{this}.Reverses" /></property>
+        <property name="DelayTime"><get Template="{this}.DelayTime" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Ray -->
+      <!-- ============================================================ -->
+      <class name="Ray">
+        <method name="new" ArgCount="2" Template="Ray.new({0}, {1})" />
+        <property name="Origin"><get Template="{this}.Origin" /></property>
+        <property name="Direction"><get Template="{this}.Direction" /></property>
+        <method name="GetUnit" Template="{this}.Unit" />
+        <method name="ClosestPoint" ArgCount="1" Template="{this}:ClosestPoint({0})" />
+        <method name="Distance" ArgCount="1" Template="{this}:Distance({0})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Rect / NumberRange / Region3 -->
+      <!-- ============================================================ -->
+      <class name="Rect">
+        <method name="new" ArgCount="2" Template="Rect.new({0}, {1})" />
+        <method name="new" ArgCount="4" Template="Rect.new({0}, {1}, {2}, {3})" />
+        <property name="Min"><get Template="{this}.Min" /></property>
+        <property name="Max"><get Template="{this}.Max" /></property>
+        <property name="Width"><get Template="{this}.Width" /></property>
+        <property name="Height"><get Template="{this}.Height" /></property>
+      </class>
+
+      <class name="NumberRange">
+        <method name="new" ArgCount="1" Template="NumberRange.new({0})" />
+        <method name="new" ArgCount="2" Template="NumberRange.new({0}, {1})" />
+        <property name="Min"><get Template="{this}.Min" /></property>
+        <property name="Max"><get Template="{this}.Max" /></property>
+      </class>
+
+      <class name="Region3">
+        <method name="new" ArgCount="2" Template="Region3.new({0}, {1})" />
+        <property name="CFrame"><get Template="{this}.CFrame" /></property>
+        <property name="Size"><get Template="{this}.Size" /></property>
+        <method name="ExpandToGrid" ArgCount="1" Template="{this}:ExpandToGrid({0})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- PhysicalProperties -->
+      <!-- ============================================================ -->
+      <class name="PhysicalProperties">
+        <method name="new" ArgCount="3" Template="PhysicalProperties.new({0}, {1}, {2})" />
+        <method name="new" ArgCount="5" Template="PhysicalProperties.new({0}, {1}, {2}, {3}, {4})" />
+        <method name="new" ArgCount="1" Template="PhysicalProperties.new({0})" />
+        <property name="Density"><get Template="{this}.Density" /></property>
+        <property name="Friction"><get Template="{this}.Friction" /></property>
+        <property name="Elasticity"><get Template="{this}.Elasticity" /></property>
+        <property name="FrictionWeight"><get Template="{this}.FrictionWeight" /></property>
+        <property name="ElasticityWeight"><get Template="{this}.ElasticityWeight" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Font -->
+      <!-- ============================================================ -->
+      <class name="Font">
+        <method name="new" ArgCount="1" Template="Font.new({0})" />
+        <method name="new" ArgCount="2" Template="Font.new({0}, {1})" />
+        <method name="new" ArgCount="3" Template="Font.new({0}, {1}, {2})" />
+        <method name="fromName" ArgCount="1" Template="Font.fromName({0})" />
+        <method name="fromName" ArgCount="2" Template="Font.fromName({0}, {1})" />
+        <method name="fromName" ArgCount="3" Template="Font.fromName({0}, {1}, {2})" />
+        <method name="fromEnum" ArgCount="1" Template="Font.fromEnum({0})" />
+        <method name="fromId" ArgCount="1" Template="Font.fromId({0})" />
+        <method name="fromId" ArgCount="2" Template="Font.fromId({0}, {1})" />
+        <method name="fromId" ArgCount="3" Template="Font.fromId({0}, {1}, {2})" />
+        <property name="Family"><get Template="{this}.Family" /></property>
+        <property name="Weight"><get Template="{this}.Weight" /></property>
+        <property name="Style"><get Template="{this}.Style" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- RaycastParams / RaycastResult -->
+      <!-- ============================================================ -->
+      <class name="RaycastParams">
+        <method name="new" Template="RaycastParams.new()" />
+        <property name="FilterDescendantsInstances" IsField="true"><get Template="{this}.FilterDescendantsInstances" /></property>
+        <property name="FilterType" IsField="true"><get Template="{this}.FilterType" /></property>
+        <property name="IgnoreWater" IsField="true"><get Template="{this}.IgnoreWater" /></property>
+        <property name="CollisionGroup" IsField="true"><get Template="{this}.CollisionGroup" /></property>
+      </class>
+
+      <class name="RaycastResult">
+        <property name="Instance"><get Template="{this}.Instance" /></property>
+        <property name="Position"><get Template="{this}.Position" /></property>
+        <property name="Normal"><get Template="{this}.Normal" /></property>
+        <property name="Material"><get Template="{this}.Material" /></property>
+        <property name="Distance"><get Template="{this}.Distance" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Camera -->
+      <!-- ============================================================ -->
+      <class name="Camera">
+        <property name="CFrame" IsField="true"><get Template="{this}.CFrame" /></property>
+        <property name="Focus" IsField="true"><get Template="{this}.Focus" /></property>
+        <property name="FieldOfView" IsField="true"><get Template="{this}.FieldOfView" /></property>
+        <property name="ViewportSize"><get Template="{this}.ViewportSize" /></property>
+        <method name="WorldToScreenPoint" ArgCount="1" Template="{this}:WorldToScreenPoint({0})" />
+        <method name="WorldToViewportPoint" ArgCount="1" Template="{this}:WorldToViewportPoint({0})" />
+        <method name="ViewportPointToRay" ArgCount="2" Template="{this}:ViewportPointToRay({0}, {1})" />
+        <method name="ViewportPointToRay" ArgCount="3" Template="{this}:ViewportPointToRay({0}, {1}, {2})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- RunService -->
+      <!-- ============================================================ -->
+      <class name="RunService">
+        <property name="Heartbeat"><get Template="{this}.Heartbeat" /></property>
+        <property name="RenderStepped"><get Template="{this}.RenderStepped" /></property>
+        <property name="Stepped"><get Template="{this}.Stepped" /></property>
+        <method name="IsClient" Template="{this}:IsClient()" />
+        <method name="IsServer" Template="{this}:IsServer()" />
+        <method name="IsStudio" Template="{this}:IsStudio()" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- TweenService -->
+      <!-- ============================================================ -->
+      <class name="TweenService">
+        <method name="Create" ArgCount="3" Template="{this}:Create({0}, {1}, {2})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Tween -->
+      <!-- ============================================================ -->
+      <class name="Tween">
+        <method name="Play" Template="{this}:Play()" />
+        <method name="Pause" Template="{this}:Pause()" />
+        <method name="Cancel" Template="{this}:Cancel()" />
+        <property name="Completed"><get Template="{this}.Completed" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- HttpService -->
+      <!-- ============================================================ -->
+      <class name="HttpService">
+        <method name="JSONEncode" ArgCount="1" Template="{this}:JSONEncode({0})" />
+        <method name="JSONDecode" ArgCount="1" Template="{this}:JSONDecode({0})" />
+        <method name="UrlEncode" ArgCount="1" Template="{this}:UrlEncode({0})" />
+        <method name="GenerateGUID" ArgCount="0" Template="{this}:GenerateGUID()" />
+        <method name="GenerateGUID" ArgCount="1" Template="{this}:GenerateGUID({0})" />
+        <method name="GetAsync" ArgCount="1" Template="{this}:GetAsync({0})" />
+        <method name="GetAsync" ArgCount="2" Template="{this}:GetAsync({0}, {1})" />
+        <method name="GetAsync" ArgCount="3" Template="{this}:GetAsync({0}, {1}, {2})" />
+        <method name="PostAsync" ArgCount="2" Template="{this}:PostAsync({0}, {1})" />
+        <method name="PostAsync" ArgCount="3" Template="{this}:PostAsync({0}, {1}, {2})" />
+        <method name="PostAsync" ArgCount="4" Template="{this}:PostAsync({0}, {1}, {2}, {3})" />
+        <method name="PostAsync" ArgCount="5" Template="{this}:PostAsync({0}, {1}, {2}, {3}, {4})" />
+        <method name="RequestAsync" ArgCount="1" Template="{this}:RequestAsync({0})" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- UserInputService -->
+      <!-- ============================================================ -->
+      <class name="UserInputService">
+        <property name="InputBegan"><get Template="{this}.InputBegan" /></property>
+        <property name="InputEnded"><get Template="{this}.InputEnded" /></property>
+        <property name="InputChanged"><get Template="{this}.InputChanged" /></property>
+        <method name="IsKeyDown" ArgCount="1" Template="{this}:IsKeyDown({0})" />
+        <method name="IsMouseButtonPressed" ArgCount="1" Template="{this}:IsMouseButtonPressed({0})" />
+        <method name="GetMouseLocation" Template="{this}:GetMouseLocation()" />
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- InputObject -->
+      <!-- ============================================================ -->
+      <class name="InputObject">
+        <property name="UserInputType"><get Template="{this}.UserInputType" /></property>
+        <property name="UserInputState"><get Template="{this}.UserInputState" /></property>
+        <property name="KeyCode"><get Template="{this}.KeyCode" /></property>
+        <property name="Position"><get Template="{this}.Position" /></property>
+        <property name="Delta"><get Template="{this}.Delta" /></property>
+      </class>
+
+      <!-- ============================================================ -->
+      <!-- Lua Libraries -->
+      <!-- ============================================================ -->
+
+      <!-- task library -->
+      <class name="task">
+        <method name="spawn" ArgCount="1" Template="task.spawn({0})" />
+        <method name="spawn" ArgCount="2" Template="task.spawn({0}, {1})" />
+        <method name="delay" ArgCount="2" Template="task.delay({0}, {1})" />
+        <method name="wait" ArgCount="0" Template="task.wait()" />
+        <method name="wait" ArgCount="1" Template="task.wait({0})" />
+        <method name="cancel" ArgCount="1" Template="task.cancel({0})" />
+        <method name="defer" ArgCount="1" Template="task.defer({0})" />
+        <method name="defer" ArgCount="2" Template="task.defer({0}, {1})" />
+        <method name="synchronize" Template="task.synchronize()" />
+        <method name="desynchronize" Template="task.desynchronize()" />
+      </class>
+
+      <!-- debug library -->
+      <class name="debug">
+        <method name="traceback" ArgCount="0" Template="debug.traceback()" />
+        <method name="traceback" ArgCount="1" Template="debug.traceback({0})" />
+        <method name="traceback" ArgCount="2" Template="debug.traceback({0}, {1})" />
+        <method name="info" ArgCount="2" Template="debug.info({0}, {1})" />
+        <method name="profilebegin" ArgCount="1" Template="debug.profilebegin({0})" />
+        <method name="profileend" Template="debug.profileend()" />
+        <method name="setmemorycategory" ArgCount="1" Template="debug.setmemorycategory({0})" />
+        <method name="resetmemorycategory" Template="debug.resetmemorycategory()" />
+      </class>
+
+      <!-- os library -->
+      <class name="os">
+        <method name="time" Template="os.time()" />
+        <method name="clock" Template="os.clock()" />
+        <method name="difftime" ArgCount="2" Template="os.difftime({0}, {1})" />
+        <method name="date" ArgCount="0" Template="os.date()" />
+        <method name="date" ArgCount="1" Template="os.date({0})" />
+        <method name="date" ArgCount="2" Template="os.date({0}, {1})" />
+      </class>
+
+    </namespace>
+  </assembly>
+</meta>

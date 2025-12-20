@@ -369,6 +369,17 @@ namespace CSharpLua {
                       AddCodeTemplateExpression(typeName, comma, codeTemplateExpression);
                     }
                   }
+                } else if (key.EndsWith("Name", StringComparison.Ordinal) && key.Length > 5) {
+                  // Handle {`0Name}, {`1Name} etc. - get type argument name as string literal
+                  string indexPart = key[1..^4]; // Extract "0", "1", etc. from "`0Name"
+                  if (int.TryParse(indexPart, out int typeNameIndex)) {
+                    var typeArgument = typeArguments?.GetOrDefault(typeNameIndex);
+                    if (typeArgument != null) {
+                      string typeArgumentName = typeArgument.Name;
+                      var stringLiteral = new LuaStringLiteralExpressionSyntax(typeArgumentName);
+                      AddCodeTemplateExpression(stringLiteral, comma, codeTemplateExpression);
+                    }
+                  }
                 } else if (int.TryParse(key[1..], out int typeIndex)) {
                   var typeArgument = typeArguments.GetOrDefault(typeIndex);
                   if (typeArgument != null) {

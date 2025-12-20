@@ -255,3 +255,6 @@ test/**/out/**/*.lua
 /CSharp.lua.Launcher/Properties/launchSettings.json
 /download/*.zip
 /.claude/settings.local.json
+
+# RobloxTypeGenerator cache
+/RobloxTypeGenerator/.cache/
