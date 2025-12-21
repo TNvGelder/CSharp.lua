@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = _G.System
+local System = rawget(_G, "__CoreSystemInternal")
 local Char = System.Char
 local throw = System.throw
 local emptyFn = System.emptyFn

@@ -1,6 +1,8 @@
 package.path = package.path .. ";../../CSharp.lua/Coresystem.lua/?.lua"
 
-require("All")()          -- coresystem.lua/All.lua
+-- Initialize CoreSystem with required namespace configuration
+local init = require("init")
+local System = init("", { systemNamespace = "CSharpLua" })
 
 
 local codeAnalysisTypes = { 

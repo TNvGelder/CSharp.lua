@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Batch1/Batch1.csproj" />
+  <Project Path="BridgeAttributes/BridgeAttributes.csproj" />
+  <Project Path="BridgeTestNUnit/BridgeTestNUnit.csproj" />
+  <Project Path="ClientTestHelper/ClientTestHelper.csproj" />
+  <Project Path="Tests/Tests.csproj" />
+</Solution>

@@ -1312,8 +1312,14 @@ namespace CSharpLua {
       return parameter;
     }
 
+    private static bool IsRobloxValueType(ITypeSymbol typeSymbol) {
+      // Roblox types (Vector3, CFrame, Color3, etc.) are immutable userdata in Luau.
+      // They don't have __clone__ methods and cloning is unnecessary.
+      return typeSymbol.ContainingNamespace?.ToString() == "Roblox";
+    }
+
     private void CheckValueTypeClone(ITypeSymbol typeSymbol, IdentifierNameSyntax node, ref LuaExpressionSyntax expression, bool isPropertyField = false) {
-      if (typeSymbol.IsCustomValueType() && !generator_.IsReadOnlyStruct(typeSymbol) && !typeSymbol.IsNullableWithBasicElementType() && expression is not LuaPropertyTemplateExpressionSyntax) {
+      if (typeSymbol.IsCustomValueType() && !generator_.IsReadOnlyStruct(typeSymbol) && !IsRobloxValueType(typeSymbol) && !typeSymbol.IsNullableWithBasicElementType() && expression is not LuaPropertyTemplateExpressionSyntax) {
         bool need = false;
         if (isPropertyField) {
           if (!node.Parent.IsKind(SyntaxKind.NameEquals)) {

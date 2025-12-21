@@ -62,8 +62,14 @@ _G.warn = function(msg) print("[WARN] " .. tostring(msg)) end  -- Mock Roblox wa
 print("Loading CoreSystem modules with game mock...\n")
 
 -- Load Core first (required by all other modules)
+-- Core.lua reads CSharpLuaSystemConfig at load time, so we must set it BEFORE dofile
 local corePath = "../../CSharp.lua/CoreSystem.Lua/CoreSystem/"
-dofile(corePath .. "Core.lua")({})
+local conf = { systemNamespace = "CSharpLua" }
+rawset(_G, "CSharpLuaSystemConfig", conf)
+dofile(corePath .. "Core.lua")(conf)
+
+-- Get System from the namespace (it's installed at _G.CSharpLua.System)
+local System = _G.CSharpLua.System
 
 print("--- Test 1: debug.setmetatable disabled ---")
 test("debugsetmetatable is disabled in Roblox mode", function()

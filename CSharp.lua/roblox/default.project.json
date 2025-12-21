@@ -6,6 +6,9 @@
       "$className": "ReplicatedStorage",
       "CoreSystem": {
         "$path": "../CoreSystem.Lua"
+      },
+      "config": {
+        "$path": "config.lua"
       }
     },
     "ServerScriptService": {

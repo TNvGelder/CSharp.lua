@@ -114,7 +114,7 @@ namespace CSharpLua {
         var type = semanticModel_.GetTypeInfo(node).Type;
         Contract.Assert(type != null);
         Contract.Assert(!node.ArgumentList!.Arguments.Any());
-        var expression = generator_.GetTypeName(type);
+        var expression = generator_.GetTypeName(type, this);
         creationExpression = new LuaInvocationExpressionSyntax(expression);
       }
 

@@ -6,10 +6,13 @@ if arg[1] == "nodebug" then
   debug = nil
 end
 
-require("All")()          -- coresystem.lua/All.lua
+-- Initialize CoreSystem with required namespace configuration
+local init = require("init")
+init("", { systemNamespace = "CSharpLua" })
+
 require("out.manifest")("out")    
 
-ILRuntimeTest.TestBase.StaticTestUnit.Run()    -- run main method
+_G.CSharpLua.ILRuntimeTest.TestBase.StaticTestUnit.Run()    -- run main method
 
 --local methodInfo = System.Reflection.Assembly.GetEntryAssembly().getEntryPoint()
 --methodInfo:Invoke()

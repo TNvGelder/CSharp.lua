@@ -8,4 +8,5 @@ run {
  metaFiles = "Bridge/Bridge.xml",
  attr = "TestCase",
  metadata = true,
+ namespace = "CSharpLua",
 }

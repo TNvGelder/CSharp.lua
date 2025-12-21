@@ -1,4 +1,4 @@
-local System = _G.System
+local System = rawget(_G, "__CoreSystemInternal")
 local emptyFn = System.emptyFn
 local define = System.define
 

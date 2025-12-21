@@ -54,6 +54,9 @@ local function compile(arg)
   if arg.module then
     cmd = cmd .. " -module"
   end
+  if arg.namespace then
+    cmd = cmd .. " -namespace " .. arg.namespace
+  end
   if arg.extra then
     cmd = cmd .. " " .. arg.extra
   end

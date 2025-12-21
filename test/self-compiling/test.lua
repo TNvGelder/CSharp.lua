@@ -14,5 +14,6 @@ run({
  output = "out",
  libs = ("%sMicrosoft.CodeAnalysis.CSharp.dll;%sMicrosoft.CodeAnalysis.dll"):format(publishOutputDir, publishOutputDir),
  metadata = true,
+ namespace = "CSharpLua",
 }, true, removeObj)
 

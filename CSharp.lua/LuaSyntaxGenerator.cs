@@ -2149,6 +2149,13 @@ namespace CSharpLua {
           if (newImportName != null) {
             return newImportName;
           }
+          // When SystemNamespace is configured and no import was created, prefix with the namespace root
+          // This ensures inline type references use _G.{SystemNamespace}.X instead of bare X
+          if (!string.IsNullOrEmpty(Setting.SystemNamespace) &&
+              !name.StartsWith(LuaIdentifierNameSyntax.System.ValueText) &&
+              !name.StartsWith(LuaIdentifierNameSyntax.Class.ValueText)) {
+            name = "_G." + Setting.SystemNamespace + '.' + name;
+          }
         }
       }
       return name;

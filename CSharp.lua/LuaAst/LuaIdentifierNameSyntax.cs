@@ -58,6 +58,7 @@ namespace CSharpLua.LuaAst {
     public static readonly LuaIdentifierNameSyntax Continue = "continue";
     public static readonly LuaIdentifierNameSyntax StringChar = "string.char";
     public static readonly LuaIdentifierNameSyntax ToStr = "ToString";
+    public static readonly LuaIdentifierNameSyntax Tostring = "tostring";
     public static readonly LuaIdentifierNameSyntax SystemToString = "System.toString";
     public static readonly LuaIdentifierNameSyntax EnumToString = "EnumToString";
     public static readonly LuaIdentifierNameSyntax DelegateMake = "System.fn";

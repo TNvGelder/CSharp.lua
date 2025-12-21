@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 limitations under the License.
 --]]
 
-local System = _G.System
+local System = rawget(_G, "__CoreSystemInternal")
 local lengthFn = System.lengthFn
 local Array = System.Array
 local ArrayDictionary = System.ArrayDictionary

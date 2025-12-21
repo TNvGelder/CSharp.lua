@@ -2655,7 +2655,7 @@ namespace CSharpLua {
       if (symbol.IsStatic) {
         if (symbol.Kind == SymbolKind.Method) {
           if (symbol.ContainingType?.SpecialType == SpecialType.System_Enum) {
-            return generator_.GetTypeName(symbol.ContainingType);
+            return generator_.GetTypeName(symbol.ContainingType, this);
           }
         } else if (symbol.Kind == SymbolKind.Field) {
           if (node.Parent.Parent.Kind().IsAssignment()) {
@@ -2663,7 +2663,7 @@ namespace CSharpLua {
             if (assignment.Left == node.Parent) {
               var type = semanticModel_.GetTypeInfo(node).Type;
               if (!symbol.ContainingType.EQ(type)) {
-                return generator_.GetTypeName(symbol.ContainingType);
+                return generator_.GetTypeName(symbol.ContainingType, this);
               }
             }
           }
@@ -4281,6 +4281,11 @@ namespace CSharpLua {
 
       if (typeInfo.IsValueType) {
         if (alignment == null) {
+          // Roblox types (Vector3, CFrame, Color3, etc.) don't have ToString() method.
+          // Use Lua's built-in tostring() function instead.
+          if (IsRobloxValueType(typeInfo)) {
+            return LuaIdentifierNameSyntax.Tostring.Invocation(original);
+          }
           var invocation = original.MemberAccess(LuaIdentifierNameSyntax.ToStr, true).Invocation();
           if (format != null) {
             invocation.AddArgument(format);

@@ -92,7 +92,7 @@ public class Program {
 
     private static int RunTranspiler(string sourceDir, string outputDir) {
         var launcherProject = Path.Combine(ProjectRoot, "CSharp.lua.Launcher", "CSharp.lua.Launcher.csproj");
-        var robloxTypesLib = Path.Combine(ProjectRoot, "RobloxTypes", "bin", "Debug", "net9.0", "RobloxTypes.dll");
+        var robloxTypesLib = Path.Combine(ProjectRoot, "RobloxTypes", "bin", "Debug", "net10.0", "RobloxTypes.dll");
         var metadataFile = Path.Combine(ProjectRoot, "RobloxMetadata", "Roblox.xml");
         var generatedMetadata = Path.Combine(ProjectRoot, "RobloxMetadata", "Roblox.Generated.xml");
 

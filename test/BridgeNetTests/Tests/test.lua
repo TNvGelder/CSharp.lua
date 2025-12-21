@@ -9,7 +9,7 @@ local function out(module)
 end
 
 local function lib(module)
-  return ("../%s/bin/Debug/net9.0/%s.dll!"):format(module, module)
+  return ("../%s/bin/Debug/net10.0/%s.dll!"):format(module, module)
 end
 
 local function libs(...)
@@ -26,7 +26,8 @@ run {
    input = src("BridgeAttributes"),
    output = out("BridgeAttributes"),
    metadata = true,
-   module = true
+   module = true,
+   namespace = "CSharpLua"
  },
  {
    depth = 3,
@@ -34,7 +35,8 @@ run {
    output = out("BridgeTestNUnit"),
    libs = lib("BridgeAttributes"),
    metadata = true,
-   module = true
+   module = true,
+   namespace = "CSharpLua"
  },
  {
    depth = 3,
@@ -42,7 +44,8 @@ run {
    output = out("ClientTestHelper"),
    libs = libs("BridgeAttributes", "BridgeTestNUnit"),
    metadata = true,
-   module = true
+   module = true,
+   namespace = "CSharpLua"
  },
  {
    depth = 3,
@@ -51,7 +54,8 @@ run {
    libs = libs("BridgeAttributes", "BridgeTestNUnit", "ClientTestHelper"),
    attr = true,
    metadata = true,
-   module = true
+   module = true,
+   namespace = "CSharpLua"
  },
  {
    depth = 3,
@@ -59,6 +63,7 @@ run {
    output = "out",
    libs = libs("BridgeTestNUnit", "Batch1"),
    metadata = true,
-   module = true
+   module = true,
+   namespace = "CSharpLua"
  },
 }

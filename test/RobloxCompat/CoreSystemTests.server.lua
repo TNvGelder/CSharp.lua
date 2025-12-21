@@ -39,6 +39,10 @@ end
 
 print("=== CSharp.lua Roblox Runtime Comprehensive Test ===\n")
 
+-- Load config and set it before requiring CoreSystem
+local config = require(game.ReplicatedStorage.config)
+rawset(_G, "__CoreSystemConfig", config)
+
 -- Load CoreSystem
 local System = require(game.ReplicatedStorage.CoreSystem)
 if not System then

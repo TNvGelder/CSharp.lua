@@ -9,26 +9,21 @@ print("\n" .. string.rep("=", 60))
 print("CSharp.lua GameSystem Test Runner")
 print(string.rep("=", 60) .. "\n")
 
--- Load shared configuration
+-- Load shared configuration and set it before requiring CoreSystem
 local config = require(game.ReplicatedStorage.config)
 local systemNamespace = config.systemNamespace or "MyGame"
-local clearGlobalSystem = config.clearGlobalSystem ~= false  -- default true
+rawset(_G, "__CoreSystemConfig", config)
 
 print("[Config] systemNamespace = " .. systemNamespace)
-print("[Config] clearGlobalSystem = " .. tostring(clearGlobalSystem))
 print("")
 
--- Step 1: Load CoreSystem and relocate to configured namespace
+-- Step 1: Load CoreSystem (it initializes directly into the configured namespace)
 print("[1/4] Loading CoreSystem...")
 local System = require(game.ReplicatedStorage.CoreSystem)
 if not System then
     error("Failed to load CoreSystem!")
 end
-
--- Relocate System to the configured namespace path
--- Generated code expects: local System = _G.<namespace>.System
-System.relocateTo(systemNamespace, clearGlobalSystem)
-print("[OK] CoreSystem loaded and relocated to _G." .. systemNamespace .. ".System\n")
+print("[OK] CoreSystem loaded at _G." .. systemNamespace .. ".System\n")
 
 -- Step 2: Debug - list what's in ReplicatedStorage
 print("[DEBUG] Contents of ReplicatedStorage:")

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --]]
 
-local System = _G.System
+local System = rawget(_G, "__CoreSystemInternal")
 local falseFn = System.falseFn
 local lengthFn = System.lengthFn
 local Array = System.Array

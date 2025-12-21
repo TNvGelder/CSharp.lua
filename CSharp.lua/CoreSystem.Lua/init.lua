@@ -53,6 +53,13 @@ local function init(dir, conf)
   local require = require
   local load
 
+  if not (conf and conf.systemNamespace and conf.systemNamespace ~= "") then
+    error("systemNamespace is required to initialize CoreSystem. Set __CoreSystemConfig.systemNamespace before requiring CoreSystem.")
+  end
+
+  -- Set config before loading Core.lua so it can initialize in the right namespace
+  rawset(_G, "CSharpLuaSystemConfig", conf)
+
   if isRoblox then
     -- Roblox: use ModuleScript hierarchy
     local root = script.CoreSystem
@@ -126,12 +133,17 @@ local function init(dir, conf)
   load("Numerics.Vector3")
   load("Numerics.Vector4")
 
-  local System = _G.System
-
-  -- Apply namespace config if provided
-  if conf and conf.systemNamespace and conf.systemNamespace ~= "" then
-    System.relocateTo(conf.systemNamespace, conf.clearGlobalSystem)
+  -- Get System from the configured namespace
+  local current = _G
+  for segment in conf.systemNamespace:gmatch("[^%.]+") do
+    current = current[segment]
   end
+  local System = current.System
+
+  -- Clear the internal reference that was used during module loading.
+  -- Modules have already captured their local references, so this is safe.
+  -- System now lives only in _G.<namespace>.System as intended.
+  rawset(_G, "__CoreSystemInternal", nil)
 
   return System
 end

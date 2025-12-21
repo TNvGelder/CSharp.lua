@@ -16,7 +16,11 @@ package.path = package.path .. ";../../CSharp.lua/Coresystem.lua/?.lua"
 local now = 0
 local timeoutQueue
 
+-- Forward-declare System so closures below can capture it as an upvalue
+local System
+
 local conf = {
+  systemNamespace = "CSharpLua",
   traceback = traceback,
   setTimeout = function (f, delay)
     if not timeoutQueue then
@@ -28,7 +32,10 @@ local conf = {
     timeoutQueue:Erase(t)
   end
 }
-require("All")("", conf)          -- coresystem.lua/All.lua
+
+-- Initialize CoreSystem with required namespace configuration
+local init = require("init")
+System = init("", conf)
 
 
 local function InnerTest()

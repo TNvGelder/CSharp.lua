@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="CSharp.lua.Launcher/CSharp.lua.Launcher.csproj" />
+  <Project Path="CSharp.lua/CSharp.lua.csproj" />
+  <Project Path="RobloxTest/RobloxTest.csproj" />
+  <Project Path="RobloxTypeGenerator/RobloxTypeGenerator.csproj" />
+  <Project Path="RobloxTypes.Plugin/RobloxTypes.Plugin.csproj" />
+  <Project Path="RobloxTypes/RobloxTypes.csproj" />
+  <Project Path="RobloxValidation/RobloxValidation.csproj" />
+  <Project Path="RobloxValidation/TestProject/TestProject.csproj" />
+  <Project Path="TestGame/TestGame.csproj" />
+</Solution>

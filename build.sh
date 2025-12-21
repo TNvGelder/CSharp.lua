@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # build solution
-dotnet build /p:Configuration=Release CSharp.lua.sln
+dotnet build /p:Configuration=Release CSharp.lua.slnx
 berr=$?
 if [ "$berr" != 0 ]; then
 	echo "errors occuring during build, please fix and retry...">&2

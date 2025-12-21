@@ -133,13 +133,13 @@ namespace CSharpLua {
     private static IEnumerable<string> GetIncludeCorSystemPaths(string dir) {
       const string kBeginMark = "load(\"";
 
-      string allFilePath = Path.Combine(dir, "All.lua");
-      if (!File.Exists(allFilePath)) {
+      string initFilePath = Path.Combine(dir, "init.lua");
+      if (!File.Exists(initFilePath)) {
         throw new ArgumentException($"-include: {dir} is not root directory of the CoreSystem library");
       }
 
       List<string> luaSystemLibs = new();
-      var lines = File.ReadAllLines(allFilePath);
+      var lines = File.ReadAllLines(initFilePath);
       foreach (string line in lines) {
         int i = line.IndexOf(kBeginMark, StringComparison.Ordinal);
         if (i != -1) {

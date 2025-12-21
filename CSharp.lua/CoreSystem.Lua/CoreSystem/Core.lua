@@ -36,6 +36,9 @@ local sfind = string.find
 local ssub = string.sub
 local debug = debug
 local global = _G
+local systemRoot = nil  -- Will be set to namespace root by installSystem()
+-- getRoot() returns the namespace root for generated code callbacks
+local function getRoot() return systemRoot or global end
 local prevSystem = rawget(global, "System")
 
 local emptyFn = function() end
@@ -106,7 +109,9 @@ local function try(tryFn, catch, finally)
 end
 
 local function set(className, cls)
-  local scope = global
+  -- When systemRoot is configured, all types are registered under it.
+  -- No dual registration - types exist only at _G.{namespace}.* when configured.
+  local scope = systemRoot or global
   local starIndex = 1
   while true do
     local pos = sfind(className, "[%.+]", starIndex) or 0
@@ -191,7 +196,7 @@ local function applyExtends(cls)
   local extends = cls.base
   if extends then
     if type(extends) == "function" then
-      extends = extends(global, cls)
+      extends = extends(getRoot(), cls)
     end
     cls.base = nil
   end
@@ -202,11 +207,11 @@ local function applyMetadata(cls)
   local metadata = cls.__metadata__
   if metadata then
     if metadatas then
-      metadatas[#metadatas + 1] = function (global)
-        cls.__metadata__ = metadata(global)
+      metadatas[#metadatas + 1] = function ()
+        cls.__metadata__ = metadata(getRoot())
       end
     else
-      cls.__metadata__ = metadata(global)
+      cls.__metadata__ = metadata(getRoot())
     end
   end
 end
@@ -485,34 +490,45 @@ System = {
 if prevSystem then
   setmetatable(System, { __index = prevSystem })
 end
-global.System = System
 
--- Support namespace relocation
--- Allows moving System from _G.System to _G.MyGame.System (or any path)
-function System.relocateTo(namespacePath, clearOriginal)
-  if not namespacePath or namespacePath == "" then return System end
-
-  -- Validate namespace string format
-  if namespacePath:match("^%.") or namespacePath:match("%.$") or namespacePath:match("%.%.") then
-    error("Invalid namespace path: '" .. namespacePath .. "' (cannot start/end with dot or have consecutive dots)")
-  end
-
+-- Helper to install System into a namespace path (e.g., "MyGame" -> _G.MyGame.System)
+-- If no namespace is provided, System is installed directly at _G.System (backward compatible)
+local function installSystem(namespacePath)
   local current = _G
-  for segment in namespacePath:gmatch("[^%.]+") do
-    if segment == "" then
-      error("Invalid namespace path: '" .. namespacePath .. "' (empty segment)")
+
+  if namespacePath and namespacePath ~= "" then
+    -- Validate namespace string format
+    if namespacePath:match("^%.") or namespacePath:match("%.$") or namespacePath:match("%.%.") then
+      error("Invalid namespace path: '" .. namespacePath .. "' (cannot start/end with dot or have consecutive dots)")
     end
-    local existing = current[segment]
-    if existing ~= nil and type(existing) ~= "table" then
-      error("Cannot create namespace segment '" .. segment .. "': already exists as " .. type(existing))
+
+    for segment in namespacePath:gmatch("[^%.]+") do
+      if segment == "" then
+        error("Invalid namespace path: '" .. namespacePath .. "' (empty segment)")
+      end
+      -- Use rawget/rawset to avoid triggering strict mode metatables
+      local existing = rawget(current, segment)
+      if existing ~= nil and type(existing) ~= "table" then
+        error("Cannot create namespace segment '" .. segment .. "': already exists as " .. type(existing))
+      end
+      rawset(current, segment, existing or {})
+      current = rawget(current, segment)
     end
-    current[segment] = existing or {}
-    current = current[segment]
+    -- Set systemRoot so that set() resolves paths under this namespace
+    systemRoot = current
   end
-  current.System = System
-  if clearOriginal then _G.System = nil end
-  return System
+  -- else: no namespace configured, systemRoot stays nil, types go to _G directly
+
+  rawset(current, "System", System)
+  -- Set internal reference for other CoreSystem modules to use during loading.
+  -- Modules use rawget(_G, "__CoreSystemInternal") instead of _G.System.
+  -- init.lua clears this after all modules are loaded.
+  rawset(global, "__CoreSystemInternal", System)
 end
+
+-- Initial install: use the pre-configured namespace if available
+local preConfiguredNamespace = rawget(global, "CSharpLuaSystemConfig") and rawget(global, "CSharpLuaSystemConfig").systemNamespace
+installSystem(preConfiguredNamespace)
 
 local debugsetmetatable = (not rawget(_G, "__isRoblox")) and debug and debug.setmetatable
 System.debugsetmetatable = debugsetmetatable
@@ -763,6 +779,8 @@ if (version or 0) < 5.3 or not load then
     end
   end
 else
+  -- Expose System as a global for the loaded chunk (Lua 5.3+ with native bitwise operators)
+  global.System = System
   load[[
   local System = System
   local throw = System.throw
@@ -1690,7 +1708,7 @@ local function defIn(kind, name, f)
   end
   assert(modules[name] == nil, name)
   namespace[1], namespace[2] = name, kind == "C" or kind == "S"
-  local t = f(assembly, global)
+  local t = f(assembly, getRoot())
   namespace[1], namespace[2] = namespaceName, isClass
   modules[isClass and name:gsub("+", ".") or name] = function()
     return def(name, kind, t)
@@ -1757,13 +1775,13 @@ function System.init(t)
   end
 
   for i = 1, #imports do
-    imports[i](global)
+    imports[i](getRoot())
   end
 
   local b, e = 1, #metadatas
   while true do
     for i = b, e do
-      metadatas[i](global)
+      metadatas[i]()
     end
     local len = #metadatas
     if len == e then
@@ -1781,7 +1799,7 @@ function System.init(t)
   local attributes = t.assembly
   if attributes then
     if type(attributes) == "function" then
-      attributes = attributes(global)
+      attributes = attributes(getRoot())
     end
     for k, v in pairs(attributes) do
       assembly[k] = v

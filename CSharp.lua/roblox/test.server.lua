@@ -8,6 +8,10 @@
   For the full test suite, use the tests in test/RobloxCompat/
 --]]
 
+-- Load config and set it before requiring CoreSystem
+local config = require(game.ReplicatedStorage.config)
+rawset(_G, "__CoreSystemConfig", config)
+
 -- Quick smoke test to verify CoreSystem loads
 local System = require(game.ReplicatedStorage.CoreSystem)
 

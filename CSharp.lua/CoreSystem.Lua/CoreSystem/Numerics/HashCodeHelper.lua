@@ -1,4 +1,4 @@
-local System = _G.System
+local System = rawget(_G, "__CoreSystemInternal")
 local bitLShift = System.sl
 local bitNot = System.bnot
 

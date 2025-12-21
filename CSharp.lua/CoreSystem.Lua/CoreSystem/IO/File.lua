@@ -17,7 +17,7 @@ limitations under the License.
 local io = io
 if io then
 
-local System = _G.System
+local System = rawget(_G, "__CoreSystemInternal")
 local define = System.define
 local throw = System.throw
 local each = System.each

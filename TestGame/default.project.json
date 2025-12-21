@@ -1,0 +1,27 @@
+{
+  "name": "TestGame",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "CoreSystem": {
+        "$path": "../CSharp.lua/CoreSystem.Lua"
+      },
+      "Game": {
+        "$path": "Output"
+      },
+      "RobloxTypes": {
+        "$path": "roblox-types.lua"
+      },
+      "config": {
+        "$path": "config.lua"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "Main": {
+        "$path": "main.server.lua"
+      }
+    }
+  }
+}
