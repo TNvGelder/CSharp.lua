@@ -5137,6 +5137,10 @@ namespace CSharpLua {
         }
       }
       if (hasCast) {
+        // Skip cast for Roblox types (avoids infinite loops with Instance userdata)
+        if (IsRoblox && IsRobloxNamespaceType(targetType)) {
+          return;
+        }
         var cast = new LuaInvocationExpressionSyntax(LuaIdentifierNameSyntax.Cast, GetTypeName(targetType), identifier);
         forInStatement.Body.AddStatement(identifier.Assignment(cast));
       }
@@ -5516,6 +5520,12 @@ namespace CSharpLua {
     }
 
     private LuaExpressionSyntax BuildCastExpression(ITypeSymbol type, LuaExpressionSyntax expression) {
+      // Skip runtime cast for Roblox types - Lua is dynamically typed
+      // and runtime type checks cause infinite loops with Roblox userdata
+      if (IsRoblox && IsRobloxNamespaceType(type)) {
+        return expression;
+      }
+
       var typeExpression = GetTypeName(type.IsNullableType() ? type.NullableElementType() : type);
       var invocation = new LuaInvocationExpressionSyntax(LuaIdentifierNameSyntax.Cast, typeExpression, expression);
       if (type.IsNullableType()) {

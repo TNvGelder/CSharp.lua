@@ -5,20 +5,29 @@ return function (path)
     root = script.Parent,
     path = path,
     files = {
+      "BuildingSpawner",
+      "CurrencyManager",
       "GameScene",
+      "ShopUI",
       "Spawnable",
-      "SpawnableBox"
+      "SpawnableBox",
+      "UIHelper"
     },
     types = {
       "TestGame.Spawnable",
+      "TestGame.BuildingSpawner",
+      "TestGame.CurrencyManager",
       "TestGame.GameScene",
-      "TestGame.SpawnableBox"
+      "TestGame.ShopItem",
+      "TestGame.ShopUI",
+      "TestGame.SpawnableBox",
+      "TestGame.UIHelper"
     },
     assembly = {
       Company = "TestGame",
       Configuration = "Debug",
       FileVersion = "1.0.0.0",
-      InformationalVersion = "1.0.0+7ab5bb34b207cfacff0001ddb60dd8917249a6ee",
+      InformationalVersion = "1.0.0+7380943d37866b898a07cfd13f35ba1bea32e231",
       Product = "TestGame",
       Title = "TestGame",
       Version = "1.0.0.0"

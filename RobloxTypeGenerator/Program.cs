@@ -129,6 +129,16 @@ string pluginMetadataPath = Path.Combine(metadataDir, "RobloxPlugin.Generated.xm
 await File.WriteAllTextAsync(pluginMetadataPath, pluginMetadataXml);
 Console.WriteLine($"  Generated {pluginMetadataPath}");
 
+// Generate Lua type stubs for Instance classes
+Console.WriteLine("Generating Lua type stubs...");
+var luaGenerator = new LuaTypeStubGenerator(apiDump.Classes);
+string luaOutput = luaGenerator.Generate();
+string luaDir = Path.Combine(baseDir, "CSharp.lua", "roblox");
+Directory.CreateDirectory(luaDir);
+string luaPath = Path.Combine(luaDir, "RobloxInstanceTypes.lua");
+await File.WriteAllTextAsync(luaPath, luaOutput);
+Console.WriteLine($"  Generated {luaPath} ({apiDump.Classes.Count} classes)");
+
 Console.WriteLine();
 Console.WriteLine("Generation complete!");
 Console.WriteLine($"  Version: {apiDump.Version}");

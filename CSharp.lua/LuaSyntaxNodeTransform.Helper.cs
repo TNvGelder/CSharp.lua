@@ -1318,6 +1318,15 @@ namespace CSharpLua {
       return typeSymbol.ContainingNamespace?.ToString() == "Roblox";
     }
 
+    /// <summary>
+    /// Checks if a type is in the Roblox namespace.
+    /// Used to skip runtime casts for Roblox types (avoids infinite loops with Instance userdata).
+    /// </summary>
+    private static bool IsRobloxNamespaceType(ITypeSymbol typeSymbol) {
+      if (typeSymbol == null) return false;
+      return typeSymbol.ContainingNamespace?.ToString() == "Roblox";
+    }
+
     private void CheckValueTypeClone(ITypeSymbol typeSymbol, IdentifierNameSyntax node, ref LuaExpressionSyntax expression, bool isPropertyField = false) {
       if (typeSymbol.IsCustomValueType() && !generator_.IsReadOnlyStruct(typeSymbol) && !IsRobloxValueType(typeSymbol) && !typeSymbol.IsNullableWithBasicElementType() && expression is not LuaPropertyTemplateExpressionSyntax) {
         bool need = false;

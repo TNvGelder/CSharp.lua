@@ -13,6 +13,9 @@
       "RobloxTypes": {
         "$path": "roblox-types.lua"
       },
+      "RobloxInstanceTypes": {
+        "$path": "../CSharp.lua/roblox/RobloxInstanceTypes.lua"
+      },
       "config": {
         "$path": "config.lua"
       }

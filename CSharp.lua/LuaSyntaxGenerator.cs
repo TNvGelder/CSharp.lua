@@ -629,6 +629,11 @@ namespace CSharpLua {
         var types = GetExportTypes();
         if (types.Count > 0) {
           var t = new LuaTableExpression();
+          if (Setting.IsRoblox) {
+            // In Roblox, script.Parent refers to the manifest's parent folder
+            LuaIdentifierNameSyntax scriptParent = "script.Parent";
+            t.Add("root", scriptParent);
+          }
           t.Add("path", "path");
           t.Add("files", new LuaTableExpression(moduleFiles.Select(i => new LuaStringLiteralExpressionSyntax(i))));
           t.Add("types", new LuaTableExpression(types.Select(i => new LuaStringLiteralExpressionSyntax(GetTypeShortName(i)))));

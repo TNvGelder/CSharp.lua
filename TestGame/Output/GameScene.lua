@@ -6,207 +6,693 @@ System.import(function (out)
 end)
 System.namespace("TestGame", function (namespace)
   -- <summary>
-  -- Sets up the game scene with a castle and village.
+  -- A beautiful medieval village scene with castle, timber-framed houses,
+  -- church, marketplace, and detailed landscaping.
   -- </summary>
   namespace.class("GameScene", function (namespace)
-    local StoneGray, DarkStone, TimberBrown, PlasterWhite, RoofRed, RoofDark, Setup, SpawnBlock, 
-    BuildCastleWalls, BuildTowers, BuildGate, BuildVillage, BuildTimberHouse, BuildWell, BuildMarketStall, static
+    local LightStone, MediumStone, DarkStone, MossyStone, DarkTimber, MediumTimber, LightWood, OldWood, 
+    PlasterWhite, PlasterCream, PlasterPink, RoofTerracotta, RoofBrown, RoofSlate, ThatchYellow, GrassGreen, 
+    DarkGrass, TreeGreen, TreeDark, TrunkBrown, FlowerRed, FlowerYellow, FlowerPurple, Water, 
+    WaterDeep, DirtPath, Cobblestone, HayYellow, MetalDark, GoldAccent, WindowBlue, BannerRed, 
+    BannerBlue, blockCount, Setup, Block, BuildTerrain, BuildCastle, BuildCastleWall, BuildCastleTower, 
+    BuildGatehouse, BuildKeep, BuildVillageLayout, BuildHouses, BuildTimberHouse, BuildChurch, BuildMarketplace, BuildMarketStall, 
+    BuildFountain, BuildBlacksmith, BuildTavern, BuildMill, BuildWell, BuildTrees, BuildTree, BuildGardens, 
+    BuildGardenPlot, BuildDecorations, BuildLampPost, BuildCart, BuildPond, BuildBridge, static
     static = function (this)
-      StoneGray = Color3.fromRGB(130, 130, 130)
-      DarkStone = Color3.fromRGB(90, 90, 90)
-      TimberBrown = Color3.fromRGB(101, 67, 33)
-      PlasterWhite = Color3.fromRGB(245, 240, 230)
-      RoofRed = Color3.fromRGB(139, 69, 49)
-      RoofDark = Color3.fromRGB(80, 50, 30)
+      LightStone = Color3.fromRGB(180, 175, 165)
+      MediumStone = Color3.fromRGB(140, 135, 125)
+      DarkStone = Color3.fromRGB(95, 90, 85)
+      MossyStone = Color3.fromRGB(110, 120, 100)
+      DarkTimber = Color3.fromRGB(75, 50, 30)
+      MediumTimber = Color3.fromRGB(101, 67, 33)
+      LightWood = Color3.fromRGB(160, 130, 100)
+      OldWood = Color3.fromRGB(90, 75, 60)
+      PlasterWhite = Color3.fromRGB(250, 245, 235)
+      PlasterCream = Color3.fromRGB(245, 235, 210)
+      PlasterPink = Color3.fromRGB(245, 225, 215)
+      RoofTerracotta = Color3.fromRGB(180, 100, 70)
+      RoofBrown = Color3.fromRGB(110, 75, 55)
+      RoofSlate = Color3.fromRGB(70, 75, 80)
+      ThatchYellow = Color3.fromRGB(190, 170, 110)
+      GrassGreen = Color3.fromRGB(65, 130, 55)
+      DarkGrass = Color3.fromRGB(45, 100, 40)
+      TreeGreen = Color3.fromRGB(45, 95, 35)
+      TreeDark = Color3.fromRGB(30, 70, 25)
+      TrunkBrown = Color3.fromRGB(80, 55, 35)
+      FlowerRed = Color3.fromRGB(200, 60, 70)
+      FlowerYellow = Color3.fromRGB(240, 200, 80)
+      FlowerPurple = Color3.fromRGB(150, 80, 170)
+      Water = Color3.fromRGB(70, 140, 180)
+      WaterDeep = Color3.fromRGB(45, 100, 140)
+      DirtPath = Color3.fromRGB(150, 125, 95)
+      Cobblestone = Color3.fromRGB(130, 130, 130)
+      HayYellow = Color3.fromRGB(210, 190, 120)
+      MetalDark = Color3.fromRGB(50, 50, 55)
+      GoldAccent = Color3.fromRGB(220, 180, 80)
+      WindowBlue = Color3.fromRGB(170, 210, 240)
+      BannerRed = Color3.fromRGB(180, 40, 45)
+      BannerBlue = Color3.fromRGB(45, 80, 160)
     end
+    blockCount = 0
     Setup = function ()
-      System.Console.WriteLine("Building medieval scene...")
+      System.Console.WriteLine("Building medieval kingdom...")
 
-      -- Ground/floor - larger for village
-      SpawnBlock("Floor", Vector3.new(0, - 0.5, 0), Vector3.new(500, 1, 500), Color3.fromRGB(50, 120, 50))
+      -- Terrain
+      BuildTerrain()
 
-      -- Dirt path from village to castle
-      SpawnBlock("Path", Vector3.new(0, - 0.4, 55), Vector3.new(8, 0.2, 70), Color3.fromRGB(139, 119, 101))
+      -- Castle complex
+      BuildCastle()
 
-      -- Build the castle
-      BuildCastleWalls()
-      BuildTowers()
-      BuildGate()
+      -- Village
+      BuildVillageLayout()
+      BuildHouses()
+      BuildChurch()
+      BuildMarketplace()
+      BuildBlacksmith()
+      BuildTavern()
+      BuildMill()
 
-      -- Build the village outside the castle
-      BuildVillage()
+      -- Landscaping
+      BuildTrees()
+      BuildGardens()
+      BuildDecorations()
+      BuildPond()
+      BuildBridge()
 
-      System.Console.WriteLine("Medieval scene complete!")
+      System.Console.WriteLine("Medieval kingdom complete! (" .. blockCount .. " blocks)")
     end
-    SpawnBlock = function (name, position, size, color)
+    Block = function (name, position, size, color)
       local block = TestGame.SpawnableBox(name, position, size, color)
       block:Spawn()
+      blockCount = blockCount + 1
     end
-    BuildCastleWalls = function ()
-      local wallHeight = 12
-      local wallThickness = 3
-      local castleSize = 40
-      local halfSize = castleSize / 2
-      local gateWidth = 10
+    BuildTerrain = function ()
+      -- Main grass field
+      Block("Terrain_Grass", Vector3.new(0, - 0.5, 0), Vector3.new(600, 1, 600), GrassGreen)
 
-      -- Back wall (full)
-      SpawnBlock("BackWall", Vector3.new(0, wallHeight / 2, - halfSize), Vector3.new(castleSize, wallHeight, wallThickness), StoneGray)
+      -- Slight hill behind castle
+      Block("Terrain_Hill1", Vector3.new(0, 0.5, - 60), Vector3.new(120, 2, 80), DarkGrass)
+      Block("Terrain_Hill2", Vector3.new(0, 1.5, - 70), Vector3.new(80, 2, 50), DarkGrass)
 
-      -- Front wall - left section (with gap for gate)
-      SpawnBlock("FrontWallLeft", Vector3.new(- halfSize / 2 - gateWidth / 4, wallHeight / 2, halfSize), Vector3.new(halfSize - gateWidth / 2, wallHeight, wallThickness), StoneGray)
+      -- Main cobblestone road from castle to village
+      for i = 0, 11 do
+        local z = 25 + i * 12
+        local wobble = (System.mod(i, 2) == 0) and 0.5 or - 0.5
+        Block("Road_" .. i, Vector3.new(wobble, 0.02, z), Vector3.new(12, 0.1, 13), Cobblestone)
+      end
 
-      -- Front wall - right section
-      SpawnBlock("FrontWallRight", Vector3.new(halfSize / 2 + gateWidth / 4, wallHeight / 2, halfSize), Vector3.new(halfSize - gateWidth / 2, wallHeight, wallThickness), StoneGray)
+      -- Village square cobblestones
+      Block("Square_Main", Vector3.new(0, 0.02, 110), Vector3.new(50, 0.1, 40), Cobblestone)
 
-      -- Left wall
-      SpawnBlock("LeftWall", Vector3.new(- halfSize, wallHeight / 2, 0), Vector3.new(wallThickness, wallHeight, castleSize), StoneGray)
-
-      -- Right wall
-      SpawnBlock("RightWall", Vector3.new(halfSize, wallHeight / 2, 0), Vector3.new(wallThickness, wallHeight, castleSize), StoneGray)
+      -- Side paths
+      Block("Path_Left", Vector3.new(- 30, 0.01, 95), Vector3.new(25, 0.1, 8), DirtPath)
+      Block("Path_Right", Vector3.new(30, 0.01, 95), Vector3.new(25, 0.1, 8), DirtPath)
+      Block("Path_Back", Vector3.new(0, 0.01, 145), Vector3.new(8, 0.1, 35), DirtPath)
     end
-    BuildTowers = function ()
-      local towerHeight = 18
-      local towerSize = 8
-      local castleSize = 40
-      local halfSize = castleSize / 2
+    BuildCastle = function ()
+      local baseY = 1
+      -- Castle sits on the hill
 
-      -- Four corner towers
-      SpawnBlock("TowerFL", Vector3.new(- halfSize, towerHeight / 2, halfSize), Vector3.new(towerSize, towerHeight, towerSize), DarkStone)
-      SpawnBlock("TowerFR", Vector3.new(halfSize, towerHeight / 2, halfSize), Vector3.new(towerSize, towerHeight, towerSize), DarkStone)
-      SpawnBlock("TowerBL", Vector3.new(- halfSize, towerHeight / 2, - halfSize), Vector3.new(towerSize, towerHeight, towerSize), DarkStone)
-      SpawnBlock("TowerBR", Vector3.new(halfSize, towerHeight / 2, - halfSize), Vector3.new(towerSize, towerHeight, towerSize), DarkStone)
+      -- Main walls with battlements
+      BuildCastleWall("Wall_N", Vector3.new(0, baseY, - 35), 70, 16, true)
+      -- Back
+      BuildCastleWall("Wall_S_L", Vector3.new(- 22, baseY, 20), 26, 16, true)
+      -- Front left
+      BuildCastleWall("Wall_S_R", Vector3.new(22, baseY, 20), 26, 16, true)
+      -- Front right
+      BuildCastleWall("Wall_E", Vector3.new(35, baseY, - 7.5), 55, 16, false)
+      -- Right (rotated)
+      BuildCastleWall("Wall_W", Vector3.new(- 35, baseY, - 7.5), 55, 16, false)
+      -- Left (rotated)
 
-      -- Tower tops (crenellations)
-      local topHeight = 2
-      local topSize = towerSize + 2
-      local topY = towerHeight + topHeight / 2
-      SpawnBlock("TowerTopFL", Vector3.new(- halfSize, topY, halfSize), Vector3.new(topSize, topHeight, topSize), DarkStone)
-      SpawnBlock("TowerTopFR", Vector3.new(halfSize, topY, halfSize), Vector3.new(topSize, topHeight, topSize), DarkStone)
-      SpawnBlock("TowerTopBL", Vector3.new(- halfSize, topY, - halfSize), Vector3.new(topSize, topHeight, topSize), DarkStone)
-      SpawnBlock("TowerTopBR", Vector3.new(halfSize, topY, - halfSize), Vector3.new(topSize, topHeight, topSize), DarkStone)
+      -- Corner towers
+      BuildCastleTower("Tower_NE", Vector3.new(35, baseY, - 35), 28)
+      BuildCastleTower("Tower_NW", Vector3.new(- 35, baseY, - 35), 28)
+      BuildCastleTower("Tower_SE", Vector3.new(35, baseY, 20), 24)
+      BuildCastleTower("Tower_SW", Vector3.new(- 35, baseY, 20), 24)
+
+      -- Gatehouse
+      BuildGatehouse(Vector3.new(0, baseY, 20))
+
+      -- Keep (main tower in center)
+      BuildKeep(Vector3.new(0, baseY, - 15))
+
+      -- Courtyard details
+      Block("Courtyard", Vector3.new(0, baseY - 0.4, - 5), Vector3.new(60, 0.2, 45), MossyStone)
+
+      -- Well in courtyard
+      BuildWell("Castle_Well", Vector3.new(- 15, baseY, 0))
+
+      -- Banners on towers
+      Block("Banner_NE", Vector3.new(35, baseY + 30, - 35), Vector3.new(1, 8, 0.3), BannerRed)
+      Block("Banner_NW", Vector3.new(- 35, baseY + 30, - 35), Vector3.new(1, 8, 0.3), BannerBlue)
     end
-    BuildGate = function ()
-      local castleSize = 40
-      local halfSize = castleSize / 2
-      local gateWidth = 10
-      local gateHeight = 8
-      local archHeight = 4
+    BuildCastleWall = function (name, pos, length, height, alongX)
+      local x = pos.X local y = pos.Y local z = pos.Z
+      local thick = 4
 
-      -- Gate arch (top of gate opening)
-      SpawnBlock("GateArch", Vector3.new(0, gateHeight + archHeight / 2, halfSize), Vector3.new(gateWidth + 2, archHeight, 4), DarkStone)
+      local size = alongX and Vector3.new(length, height, thick) or Vector3.new(thick, height, length)
 
-      -- Gate pillars on each side
-      SpawnBlock("GatePillarLeft", Vector3.new(- gateWidth / 2 - 1, (gateHeight + archHeight) / 2, halfSize), Vector3.new(2, gateHeight + archHeight, 4), DarkStone)
+      -- Main wall
+      Block(name, Vector3.new(x, y + height / 2, z), size, MediumStone)
 
-      SpawnBlock("GatePillarRight", Vector3.new(gateWidth / 2 + 1, (gateHeight + archHeight) / 2, halfSize), Vector3.new(2, gateHeight + archHeight, 4), DarkStone)
+      -- Wall top / walkway
+      local topSize = alongX and Vector3.new(length, 1, thick + 2) or Vector3.new(thick + 2, 1, length)
+      Block(name .. "_Top", Vector3.new(x, y + height + 0.5, z), topSize, LightStone)
+
+      -- Battlements (merlons)
+      local merlonCount = System.ToInt32(length / 6)
+      for i = 0, merlonCount - 1 do
+        local offset = - length / 2 + 3 + i * 6
+        local mx = alongX and (x + offset) or x
+        local mz = alongX and z or (z + offset)
+        -- Outer merlon
+        local outerOffset = alongX and (thick / 2 + 0.5) or 0
+        local outerOffsetZ = alongX and 0 or (thick / 2 + 0.5)
+        Block(name .. "_Merlon_" .. i, Vector3.new(mx + (alongX and 0 or outerOffset), y + height + 2.5, mz + (alongX and outerOffset or 0)), Vector3.new(alongX and 2 or 1.5, 4, alongX and 1.5 or 2), DarkStone)
+      end
     end
-    BuildVillage = function ()
-      -- Village is positioned outside the castle gate (positive Z)
-      local villageZ = 70
+    BuildCastleTower = function (name, pos, height)
+      local x = pos.X local y = pos.Y local z = pos.Z
+      local size = 12
 
-      -- Row of houses on the left side of the path
-      BuildTimberHouse("House1", Vector3.new(- 20, 0, villageZ), 12, 10, 14)
-      BuildTimberHouse("House2", Vector3.new(- 20, 0, villageZ + 25), 10, 8, 12)
-      BuildTimberHouse("House3", Vector3.new(- 35, 0, villageZ + 10), 14, 12, 16)
+      -- Main tower body
+      Block(name .. "_Base", Vector3.new(x, y + height / 2, z), Vector3.new(size, height, size), DarkStone)
 
-      -- Row of houses on the right side of the path
-      BuildTimberHouse("House4", Vector3.new(20, 0, villageZ), 11, 9, 13)
-      BuildTimberHouse("House5", Vector3.new(20, 0, villageZ + 25), 13, 11, 15)
-      BuildTimberHouse("House6", Vector3.new(35, 0, villageZ + 10), 10, 8, 12)
+      -- Lighter middle section
+      Block(name .. "_Mid", Vector3.new(x, y + height / 2, z), Vector3.new(size - 1, height - 4, size - 1), MediumStone)
 
-      -- A larger tavern/inn at the end
-      BuildTimberHouse("Tavern", Vector3.new(0, 0, villageZ + 45), 18, 12, 20)
+      -- Top platform
+      Block(name .. "_Platform", Vector3.new(x, y + height + 0.5, z), Vector3.new(size + 2, 1, size + 2), LightStone)
 
-      -- Well in the village center
-      BuildWell(Vector3.new(0, 0, villageZ + 15))
-
-      -- Market stalls
-      BuildMarketStall("Stall1", Vector3.new(- 8, 0, villageZ + 15))
-      BuildMarketStall("Stall2", Vector3.new(8, 0, villageZ + 15))
-    end
-    BuildTimberHouse = function (name, pos, width, height, depth)
-      local x = pos.X
-      local z = pos.Z
-
-      -- Main white plaster walls
-      SpawnBlock(name .. "_Body", Vector3.new(x, height / 2, z), Vector3.new(width, height, depth), PlasterWhite)
-
-      -- Timber frame - horizontal beams
-      local beamThickness = 0.8
-
-      -- Bottom beam
-      SpawnBlock(name .. "_BeamBot", Vector3.new(x, beamThickness / 2, z), Vector3.new(width + 0.2, beamThickness, depth + 0.2), TimberBrown)
-
-      -- Middle beam
-      SpawnBlock(name .. "_BeamMid", Vector3.new(x, height / 2, z), Vector3.new(width + 0.2, beamThickness, depth + 0.2), TimberBrown)
-
-      -- Top beam
-      SpawnBlock(name .. "_BeamTop", Vector3.new(x, height - beamThickness / 2, z), Vector3.new(width + 0.2, beamThickness, depth + 0.2), TimberBrown)
-
-      -- Vertical corner beams (front face)
-      SpawnBlock(name .. "_CornerFL", Vector3.new(x - width / 2 + beamThickness / 2, height / 2, z + depth / 2), Vector3.new(beamThickness, height, beamThickness), TimberBrown)
-      SpawnBlock(name .. "_CornerFR", Vector3.new(x + width / 2 - beamThickness / 2, height / 2, z + depth / 2), Vector3.new(beamThickness, height, beamThickness), TimberBrown)
-
-      -- Diagonal cross beams on front (the classic X pattern)
-      -- We'll simulate with two angled blocks - simplified as small blocks
-      SpawnBlock(name .. "_CrossF1", Vector3.new(x - width / 4, height / 4, z + depth / 2 + 0.1), Vector3.new(beamThickness, height / 3, beamThickness), TimberBrown)
-      SpawnBlock(name .. "_CrossF2", Vector3.new(x + width / 4, height / 4, z + depth / 2 + 0.1), Vector3.new(beamThickness, height / 3, beamThickness), TimberBrown)
-      SpawnBlock(name .. "_CrossF3", Vector3.new(x - width / 4, height * 3 / 4, z + depth / 2 + 0.1), Vector3.new(beamThickness, height / 3, beamThickness), TimberBrown)
-      SpawnBlock(name .. "_CrossF4", Vector3.new(x + width / 4, height * 3 / 4, z + depth / 2 + 0.1), Vector3.new(beamThickness, height / 3, beamThickness), TimberBrown)
-
-      -- Peaked roof
-      local roofHeight = height * 0.6
-      local roofOverhang = 2
-
-      -- Roof - two slanted sections (simplified as angled blocks)
-      -- Left roof slope
-      SpawnBlock(name .. "_RoofL", Vector3.new(x - width / 4, height + roofHeight / 2, z), Vector3.new(width / 2 + roofOverhang, roofHeight, depth + roofOverhang * 2), RoofRed)
-      -- Right roof slope
-      SpawnBlock(name .. "_RoofR", Vector3.new(x + width / 4, height + roofHeight / 2, z), Vector3.new(width / 2 + roofOverhang, roofHeight, depth + roofOverhang * 2), RoofRed)
-
-      -- Roof peak
-      SpawnBlock(name .. "_RoofPeak", Vector3.new(x, height + roofHeight - 0.5, z), Vector3.new(2, 1, depth + roofOverhang * 2), RoofDark)
-
-      -- Door (dark opening)
-      SpawnBlock(name .. "_Door", Vector3.new(x, 3, z + depth / 2 + 0.2), Vector3.new(3, 6, 0.5), Color3.fromRGB(50, 35, 25))
+      -- Conical roof (simplified as stacked blocks)
+      Block(name .. "_Roof1", Vector3.new(x, y + height + 3, z), Vector3.new(10, 4, 10), RoofSlate)
+      Block(name .. "_Roof2", Vector3.new(x, y + height + 6, z), Vector3.new(6, 4, 6), RoofSlate)
+      Block(name .. "_Roof3", Vector3.new(x, y + height + 9, z), Vector3.new(2, 3, 2), RoofSlate)
 
       -- Windows
-      SpawnBlock(name .. "_Window1", Vector3.new(x - width / 3, height / 2 + 1, z + depth / 2 + 0.2), Vector3.new(2, 2, 0.3), Color3.fromRGB(180, 220, 255))
-      SpawnBlock(name .. "_Window2", Vector3.new(x + width / 3, height / 2 + 1, z + depth / 2 + 0.2), Vector3.new(2, 2, 0.3), Color3.fromRGB(180, 220, 255))
+      Block(name .. "_Win1", Vector3.new(x, y + height * 0.7, z + size / 2 + 0.1), Vector3.new(2, 4, 0.3), WindowBlue)
+      Block(name .. "_Win2", Vector3.new(x + size / 2 + 0.1, y + height * 0.7, z), Vector3.new(0.3, 4, 2), WindowBlue)
     end
-    BuildWell = function (pos)
-      local x = pos.X
-      local z = pos.Z
+    BuildGatehouse = function (pos)
+      local x = pos.X local y = pos.Y local z = pos.Z
+      local gateWidth = 10
+      local gateHeight = 12
 
-      -- Stone base
-      SpawnBlock("Well_Base", Vector3.new(x, 1.5, z), Vector3.new(5, 3, 5), StoneGray)
+      -- Two flanking towers
+      Block("Gate_TowerL", Vector3.new(x - 9, y + 10, z), Vector3.new(8, 20, 10), DarkStone)
+      Block("Gate_TowerR", Vector3.new(x + 9, y + 10, z), Vector3.new(8, 20, 10), DarkStone)
 
-      -- Water inside (blue)
-      SpawnBlock("Well_Water", Vector3.new(x, 2.5, z), Vector3.new(3, 1, 3), Color3.fromRGB(64, 164, 223))
+      -- Tower tops
+      Block("Gate_TopL", Vector3.new(x - 9, y + 21, z), Vector3.new(10, 2, 12), LightStone)
+      Block("Gate_TopR", Vector3.new(x + 9, y + 21, z), Vector3.new(10, 2, 12), LightStone)
 
-      -- Wooden posts
-      SpawnBlock("Well_Post1", Vector3.new(x - 2, 4, z), Vector3.new(0.8, 5, 0.8), TimberBrown)
-      SpawnBlock("Well_Post2", Vector3.new(x + 2, 4, z), Vector3.new(0.8, 5, 0.8), TimberBrown)
+      -- Pointed roofs
+      Block("Gate_RoofL1", Vector3.new(x - 9, y + 24, z), Vector3.new(8, 4, 10), RoofSlate)
+      Block("Gate_RoofL2", Vector3.new(x - 9, y + 27, z), Vector3.new(4, 3, 6), RoofSlate)
+      Block("Gate_RoofR1", Vector3.new(x + 9, y + 24, z), Vector3.new(8, 4, 10), RoofSlate)
+      Block("Gate_RoofR2", Vector3.new(x + 9, y + 27, z), Vector3.new(4, 3, 6), RoofSlate)
 
-      -- Roof beam
-      SpawnBlock("Well_Beam", Vector3.new(x, 6.5, z), Vector3.new(6, 0.8, 1), TimberBrown)
+      -- Arch over gate
+      Block("Gate_Arch", Vector3.new(x, y + gateHeight + 3, z), Vector3.new(gateWidth + 2, 6, 6), MediumStone)
+      Block("Gate_ArchTop", Vector3.new(x, y + gateHeight + 7, z), Vector3.new(gateWidth + 4, 2, 8), LightStone)
 
-      -- Small roof
-      SpawnBlock("Well_Roof", Vector3.new(x, 7.5, z), Vector3.new(7, 1, 4), RoofDark)
+      -- Decorative elements
+      Block("Gate_Crest", Vector3.new(x, y + gateHeight + 9, z + 4.5), Vector3.new(6, 6, 1), GoldAccent)
+
+      -- Portcullis grooves (dark lines)
+      Block("Gate_GrooveL", Vector3.new(x - gateWidth / 2 + 0.3, y + gateHeight / 2, z + 3), Vector3.new(0.5, gateHeight, 0.5), MetalDark)
+      Block("Gate_GrooveR", Vector3.new(x + gateWidth / 2 - 0.3, y + gateHeight / 2, z + 3), Vector3.new(0.5, gateHeight, 0.5), MetalDark)
     end
-    BuildMarketStall = function (name, pos)
-      local x = pos.X
-      local z = pos.Z
+    BuildKeep = function (pos)
+      local x = pos.X local y = pos.Y local z = pos.Z
 
-      -- Wooden counter
-      SpawnBlock(name .. "_Counter", Vector3.new(x, 2, z), Vector3.new(6, 1, 3), TimberBrown)
+      -- Main keep body
+      Block("Keep_Base", Vector3.new(x, y + 15, z), Vector3.new(24, 30, 20), MediumStone)
+      Block("Keep_Detail", Vector3.new(x, y + 15, z), Vector3.new(22, 28, 18), LightStone)
+
+      -- Top battlements
+      Block("Keep_Top", Vector3.new(x, y + 31, z), Vector3.new(26, 2, 22), DarkStone)
+
+      -- Corner turrets on keep
+      Block("Keep_Turret1", Vector3.new(x - 10, y + 20, z - 8), Vector3.new(6, 40, 6), DarkStone)
+      Block("Keep_Turret2", Vector3.new(x + 10, y + 20, z - 8), Vector3.new(6, 40, 6), DarkStone)
+      Block("Keep_Turret3", Vector3.new(x - 10, y + 18, z + 8), Vector3.new(6, 36, 6), DarkStone)
+      Block("Keep_Turret4", Vector3.new(x + 10, y + 18, z + 8), Vector3.new(6, 36, 6), DarkStone)
+
+      -- Turret roofs
+      Block("Keep_TRoof1", Vector3.new(x - 10, y + 42, z - 8), Vector3.new(4, 6, 4), RoofSlate)
+      Block("Keep_TRoof2", Vector3.new(x + 10, y + 42, z - 8), Vector3.new(4, 6, 4), RoofSlate)
+      Block("Keep_TRoof3", Vector3.new(x - 10, y + 38, z + 8), Vector3.new(4, 6, 4), RoofSlate)
+      Block("Keep_TRoof4", Vector3.new(x + 10, y + 38, z + 8), Vector3.new(4, 6, 4), RoofSlate)
+
+      -- Windows
+      for floor = 0, 2 do
+        local wy = y + 8 + floor * 10
+        Block("Keep_WinF" .. floor, Vector3.new(x, wy, z + 10.1), Vector3.new(3, 5, 0.3), WindowBlue)
+        Block("Keep_WinL" .. floor, Vector3.new(x - 12.1, wy, z), Vector3.new(0.3, 5, 3), WindowBlue)
+        Block("Keep_WinR" .. floor, Vector3.new(x + 12.1, wy, z), Vector3.new(0.3, 5, 3), WindowBlue)
+      end
+
+      -- Grand entrance
+      Block("Keep_Door", Vector3.new(x, y + 5, z + 10.1), Vector3.new(6, 10, 0.5), DarkTimber)
+      Block("Keep_DoorFrame", Vector3.new(x, y + 5, z + 10.3), Vector3.new(8, 12, 0.3), MediumStone)
+    end
+    BuildVillageLayout = function ()
+      -- Village is centered around z = 110 (the square)
+      -- Buildings arranged organically around the square
+    end
+    BuildHouses = function ()
+      -- Houses around the village square
+      -- Left side
+      BuildTimberHouse("House_L1", Vector3.new(- 40, 0, 85), 14, 11, 12, PlasterWhite, RoofTerracotta, false)
+      BuildTimberHouse("House_L2", Vector3.new(- 42, 0, 105), 12, 9, 14, PlasterCream, RoofBrown, true)
+      BuildTimberHouse("House_L3", Vector3.new(- 38, 0, 125), 16, 12, 13, PlasterPink, RoofTerracotta, false)
+
+      -- Right side
+      BuildTimberHouse("House_R1", Vector3.new(40, 0, 85), 13, 10, 13, PlasterCream, RoofBrown, true)
+      BuildTimberHouse("House_R2", Vector3.new(42, 0, 108), 15, 11, 12, PlasterWhite, RoofTerracotta, false)
+      BuildTimberHouse("House_R3", Vector3.new(38, 0, 130), 11, 9, 11, PlasterPink, RoofBrown, true)
+
+      -- Back of square
+      BuildTimberHouse("House_B1", Vector3.new(- 18, 0, 145), 14, 10, 14, PlasterWhite, RoofTerracotta, true)
+      BuildTimberHouse("House_B2", Vector3.new(18, 0, 148), 12, 11, 12, PlasterCream, RoofBrown, false)
+
+      -- Outer village
+      BuildTimberHouse("House_O1", Vector3.new(- 60, 0, 95), 10, 8, 10, PlasterCream, ThatchYellow, false)
+      BuildTimberHouse("House_O2", Vector3.new(58, 0, 140), 11, 9, 11, PlasterWhite, ThatchYellow, true)
+      BuildTimberHouse("House_O3", Vector3.new(- 55, 0, 145), 13, 10, 12, PlasterPink, ThatchYellow, false)
+    end
+    BuildTimberHouse = function (name, pos, w, h, d, plaster, roof, hasJetty)
+      local x = pos.X local z = pos.Z
+      local jettyOverhang = hasJetty and 1.5 or 0
+      local firstFloorH = h * 0.55
+      local secondFloorH = h * 0.45
+
+      -- === FIRST FLOOR ===
+      Block(name .. "_Floor1", Vector3.new(x, firstFloorH / 2, z), Vector3.new(w, firstFloorH, d), plaster)
+
+      -- Timber frame - first floor
+      local beam = 0.6
+      -- Corner posts
+      Block(name .. "_Post_FL", Vector3.new(x - w / 2 + beam / 2, firstFloorH / 2, z + d / 2 - beam / 2), Vector3.new(beam, firstFloorH, beam), DarkTimber)
+      Block(name .. "_Post_FR", Vector3.new(x + w / 2 - beam / 2, firstFloorH / 2, z + d / 2 - beam / 2), Vector3.new(beam, firstFloorH, beam), DarkTimber)
+      Block(name .. "_Post_BL", Vector3.new(x - w / 2 + beam / 2, firstFloorH / 2, z - d / 2 + beam / 2), Vector3.new(beam, firstFloorH, beam), DarkTimber)
+      Block(name .. "_Post_BR", Vector3.new(x + w / 2 - beam / 2, firstFloorH / 2, z - d / 2 + beam / 2), Vector3.new(beam, firstFloorH, beam), DarkTimber)
+
+      -- Horizontal beams
+      Block(name .. "_HBeam_Bot", Vector3.new(x, beam / 2, z + d / 2), Vector3.new(w + 0.2, beam, beam), DarkTimber)
+      Block(name .. "_HBeam_Mid", Vector3.new(x, firstFloorH / 2, z + d / 2), Vector3.new(w + 0.2, beam, beam), DarkTimber)
+      Block(name .. "_HBeam_Top", Vector3.new(x, firstFloorH, z + d / 2), Vector3.new(w + 0.2, beam, beam), DarkTimber)
+
+      -- Cross braces (X pattern on front) - simplified
+      Block(name .. "_X1", Vector3.new(x - w / 4, firstFloorH * 0.25, z + d / 2 + 0.05), Vector3.new(beam * 0.8, firstFloorH * 0.4, beam * 0.5), DarkTimber)
+      Block(name .. "_X2", Vector3.new(x + w / 4, firstFloorH * 0.25, z + d / 2 + 0.05), Vector3.new(beam * 0.8, firstFloorH * 0.4, beam * 0.5), DarkTimber)
+      Block(name .. "_X3", Vector3.new(x - w / 4, firstFloorH * 0.75, z + d / 2 + 0.05), Vector3.new(beam * 0.8, firstFloorH * 0.4, beam * 0.5), DarkTimber)
+      Block(name .. "_X4", Vector3.new(x + w / 4, firstFloorH * 0.75, z + d / 2 + 0.05), Vector3.new(beam * 0.8, firstFloorH * 0.4, beam * 0.5), DarkTimber)
+
+      -- === SECOND FLOOR (with optional jetty) ===
+      local floor2W = w + jettyOverhang * 2
+      local floor2D = d + jettyOverhang * 2
+      local floor2Y = firstFloorH + secondFloorH / 2
+
+      -- Jetty support beam
+      if hasJetty then
+        Block(name .. "_Jetty", Vector3.new(x, firstFloorH + 0.3, z + d / 2 + jettyOverhang / 2), Vector3.new(floor2W + 0.5, 0.6, jettyOverhang + 0.5), DarkTimber)
+      end
+
+      Block(name .. "_Floor2", Vector3.new(x, floor2Y, z), Vector3.new(floor2W, secondFloorH, floor2D), plaster)
+
+      -- Second floor timber frame
+      Block(name .. "_Post2_FL", Vector3.new(x - floor2W / 2 + beam / 2, floor2Y, z + floor2D / 2 - beam / 2), Vector3.new(beam, secondFloorH, beam), DarkTimber)
+      Block(name .. "_Post2_FR", Vector3.new(x + floor2W / 2 - beam / 2, floor2Y, z + floor2D / 2 - beam / 2), Vector3.new(beam, secondFloorH, beam), DarkTimber)
+      Block(name .. "_HBeam2_Top", Vector3.new(x, firstFloorH + secondFloorH, z + floor2D / 2), Vector3.new(floor2W + 0.2, beam, beam), DarkTimber)
+
+      -- === ROOF ===
+      local roofH = h * 0.5
+      local roofOverhang = 1.5
+
+      -- Two-sided roof
+      Block(name .. "_RoofL", Vector3.new(x - floor2W / 4, firstFloorH + secondFloorH + roofH / 2, z), Vector3.new(floor2W / 2 + roofOverhang, roofH, floor2D + roofOverhang * 2), roof)
+      Block(name .. "_RoofR", Vector3.new(x + floor2W / 4, firstFloorH + secondFloorH + roofH / 2, z), Vector3.new(floor2W / 2 + roofOverhang, roofH, floor2D + roofOverhang * 2), roof)
+
+      -- Ridge
+      Block(name .. "_Ridge", Vector3.new(x, firstFloorH + secondFloorH + roofH - 0.3, z), Vector3.new(1.5, 0.8, floor2D + roofOverhang * 2 + 1), DarkTimber)
+
+      -- === DETAILS ===
+      -- Door
+      Block(name .. "_Door", Vector3.new(x, 2.5, z + d / 2 + 0.15), Vector3.new(2.5, 5, 0.4), DarkTimber)
+      Block(name .. "_DoorFrame", Vector3.new(x, 2.5, z + d / 2 + 0.2), Vector3.new(3, 5.5, 0.2), MediumTimber)
+
+      -- Windows
+      Block(name .. "_Win1", Vector3.new(x - w / 3, firstFloorH * 0.6, z + d / 2 + 0.15), Vector3.new(1.8, 2.2, 0.2), WindowBlue)
+      Block(name .. "_Win2", Vector3.new(x + w / 3, firstFloorH * 0.6, z + d / 2 + 0.15), Vector3.new(1.8, 2.2, 0.2), WindowBlue)
+      Block(name .. "_Win3", Vector3.new(x, floor2Y, z + floor2D / 2 + 0.15), Vector3.new(2.2, 2.5, 0.2), WindowBlue)
+
+      -- Window frames
+      Block(name .. "_WinFrame1", Vector3.new(x - w / 3, firstFloorH * 0.6, z + d / 2 + 0.2), Vector3.new(2.2, 2.6, 0.15), DarkTimber)
+      Block(name .. "_WinFrame2", Vector3.new(x + w / 3, firstFloorH * 0.6, z + d / 2 + 0.2), Vector3.new(2.2, 2.6, 0.15), DarkTimber)
+
+      -- Flower box under one window
+      Block(name .. "_FlowerBox", Vector3.new(x - w / 3, firstFloorH * 0.6 - 1.5, z + d / 2 + 0.5), Vector3.new(2.5, 0.8, 1), OldWood)
+      Block(name .. "_Flowers", Vector3.new(x - w / 3, firstFloorH * 0.6 - 1, z + d / 2 + 0.5), Vector3.new(2, 0.6, 0.6), FlowerRed)
+
+      -- Chimney
+      Block(name .. "_Chimney", Vector3.new(x + w / 3, firstFloorH + secondFloorH + roofH + 1, z - d / 4), Vector3.new(2, 4, 2), DarkStone)
+    end
+    BuildChurch = function ()
+      local x = 0 local z = 165
+
+      -- Main nave
+      Block("Church_Nave", Vector3.new(x, 8, z), Vector3.new(16, 16, 30), LightStone)
+
+      -- Bell tower
+      Block("Church_Tower", Vector3.new(x, 20, z + 12), Vector3.new(10, 40, 10), MediumStone)
+      Block("Church_TowerTop", Vector3.new(x, 42, z + 12), Vector3.new(12, 4, 12), LightStone)
+
+      -- Spire
+      Block("Church_Spire1", Vector3.new(x, 47, z + 12), Vector3.new(8, 8, 8), RoofSlate)
+      Block("Church_Spire2", Vector3.new(x, 53, z + 12), Vector3.new(4, 8, 4), RoofSlate)
+      Block("Church_Spire3", Vector3.new(x, 58, z + 12), Vector3.new(1.5, 6, 1.5), RoofSlate)
+      Block("Church_Cross", Vector3.new(x, 62, z + 12), Vector3.new(0.5, 3, 0.5), GoldAccent)
+      Block("Church_CrossArm", Vector3.new(x, 61, z + 12), Vector3.new(2, 0.5, 0.5), GoldAccent)
+
+      -- Roof
+      Block("Church_RoofL", Vector3.new(x - 5, 18, z), Vector3.new(8, 6, 32), RoofSlate)
+      Block("Church_RoofR", Vector3.new(x + 5, 18, z), Vector3.new(8, 6, 32), RoofSlate)
+
+      -- Entrance
+      Block("Church_Door", Vector3.new(x, 4, z + 15.5), Vector3.new(4, 8, 0.5), DarkTimber)
+      Block("Church_Arch", Vector3.new(x, 9, z + 15.5), Vector3.new(6, 3, 1), LightStone)
+
+      -- Rose window
+      Block("Church_Window", Vector3.new(x, 12, z + 15.5), Vector3.new(5, 5, 0.3), WindowBlue)
+      Block("Church_WinFrame", Vector3.new(x, 12, z + 15.6), Vector3.new(6, 6, 0.2), DarkStone)
+
+      -- Side windows
+      for i = 0, 2 do
+        local wz = z - 8 + i * 8
+        Block("Church_SideWinL" .. i, Vector3.new(x - 8.2, 8, wz), Vector3.new(0.3, 6, 2), WindowBlue)
+        Block("Church_SideWinR" .. i, Vector3.new(x + 8.2, 8, wz), Vector3.new(0.3, 6, 2), WindowBlue)
+      end
+    end
+    BuildMarketplace = function ()
+      -- Market stalls around the square
+      BuildMarketStall("Stall_1", Vector3.new(- 12, 0, 100), BannerRed)
+      BuildMarketStall("Stall_2", Vector3.new(0, 0, 100), BannerBlue)
+      BuildMarketStall("Stall_3", Vector3.new(12, 0, 100), Color3.fromRGB(80, 160, 80))
+
+      -- Central fountain/well
+      BuildFountain(Vector3.new(0, 0, 115))
+
+      -- Crates and barrels
+      Block("Crate_1", Vector3.new(- 8, 1, 108), Vector3.new(2, 2, 2), LightWood)
+      Block("Crate_2", Vector3.new(- 7, 1, 110), Vector3.new(1.5, 1.5, 1.5), OldWood)
+      Block("Barrel_1", Vector3.new(10, 1.5, 107), Vector3.new(2, 3, 2), MediumTimber)
+      Block("Barrel_2", Vector3.new(12, 1.5, 108), Vector3.new(2, 3, 2), MediumTimber)
+
+      -- Hay bales
+      Block("Hay_1", Vector3.new(15, 1, 103), Vector3.new(3, 2, 2), HayYellow)
+      Block("Hay_2", Vector3.new(16, 2.5, 104), Vector3.new(2, 1.5, 2), HayYellow)
+    end
+    BuildMarketStall = function (name, pos, canopyColor)
+      local x = pos.X local z = pos.Z
+
+      -- Counter
+      Block(name .. "_Counter", Vector3.new(x, 2, z), Vector3.new(8, 1.5, 4), LightWood)
+      Block(name .. "_Front", Vector3.new(x, 1, z + 2), Vector3.new(8, 2, 0.5), OldWood)
 
       -- Support posts
-      SpawnBlock(name .. "_Post1", Vector3.new(x - 2.5, 2.5, z + 1), Vector3.new(0.5, 5, 0.5), TimberBrown)
-      SpawnBlock(name .. "_Post2", Vector3.new(x + 2.5, 2.5, z + 1), Vector3.new(0.5, 5, 0.5), TimberBrown)
+      Block(name .. "_PostL", Vector3.new(x - 3.5, 3.5, z - 1.5), Vector3.new(0.5, 7, 0.5), MediumTimber)
+      Block(name .. "_PostR", Vector3.new(x + 3.5, 3.5, z - 1.5), Vector3.new(0.5, 7, 0.5), MediumTimber)
 
       -- Canopy
-      SpawnBlock(name .. "_Canopy", Vector3.new(x, 5.5, z), Vector3.new(7, 0.3, 5), Color3.fromRGB(180, 50, 50))
+      Block(name .. "_Canopy", Vector3.new(x, 7.5, z), Vector3.new(10, 0.4, 6), canopyColor)
+
+      -- Goods on display (colored blocks)
+      Block(name .. "_Goods1", Vector3.new(x - 2, 3, z), Vector3.new(1.5, 0.8, 1.5), FlowerRed)
+      Block(name .. "_Goods2", Vector3.new(x, 3, z), Vector3.new(1.5, 0.8, 1.5), FlowerYellow)
+      Block(name .. "_Goods3", Vector3.new(x + 2, 3, z), Vector3.new(1.5, 0.8, 1.5), FlowerPurple)
+    end
+    BuildFountain = function (pos)
+      local x = pos.X local z = pos.Z
+
+      -- Base pool
+      Block("Fountain_Pool", Vector3.new(x, 1, z), Vector3.new(10, 2, 10), MediumStone)
+      Block("Fountain_Water", Vector3.new(x, 1.8, z), Vector3.new(8, 1, 8), Water)
+
+      -- Central pillar
+      Block("Fountain_Pillar", Vector3.new(x, 4, z), Vector3.new(2, 6, 2), LightStone)
+
+      -- Top basin
+      Block("Fountain_Basin", Vector3.new(x, 7.5, z), Vector3.new(4, 1.5, 4), LightStone)
+      Block("Fountain_TopWater", Vector3.new(x, 8, z), Vector3.new(3, 0.8, 3), Water)
+
+      -- Decorative top
+      Block("Fountain_Top", Vector3.new(x, 9, z), Vector3.new(1, 2, 1), LightStone)
+    end
+    BuildBlacksmith = function ()
+      local x = 55 local z = 105
+
+      -- Main building
+      Block("Smith_Building", Vector3.new(x, 5, z), Vector3.new(14, 10, 12), MediumStone)
+      Block("Smith_Roof", Vector3.new(x, 11, z), Vector3.new(16, 3, 14), RoofSlate)
+
+      -- Open forge area
+      Block("Smith_ForgeFloor", Vector3.new(x + 10, 0.5, z), Vector3.new(8, 1, 10), Cobblestone)
+      Block("Smith_ForgeRoof", Vector3.new(x + 10, 8, z), Vector3.new(10, 0.5, 12), RoofSlate)
+
+      -- Support posts
+      Block("Smith_Post1", Vector3.new(x + 6, 4, z + 5), Vector3.new(1, 8, 1), DarkTimber)
+      Block("Smith_Post2", Vector3.new(x + 6, 4, z - 5), Vector3.new(1, 8, 1), DarkTimber)
+      Block("Smith_Post3", Vector3.new(x + 14, 4, z + 5), Vector3.new(1, 8, 1), DarkTimber)
+      Block("Smith_Post4", Vector3.new(x + 14, 4, z - 5), Vector3.new(1, 8, 1), DarkTimber)
+
+      -- Forge
+      Block("Smith_Forge", Vector3.new(x + 12, 2, z), Vector3.new(4, 4, 4), DarkStone)
+      Block("Smith_Fire", Vector3.new(x + 12, 3, z), Vector3.new(2, 1.5, 2), Color3.fromRGB(255, 120, 30))
+
+      -- Chimney
+      Block("Smith_Chimney", Vector3.new(x + 12, 8, z), Vector3.new(3, 10, 3), DarkStone)
+
+      -- Anvil
+      Block("Smith_Anvil", Vector3.new(x + 9, 1.5, z), Vector3.new(1.5, 2, 1), MetalDark)
+
+      -- Water trough
+      Block("Smith_Trough", Vector3.new(x + 8, 1, z + 4), Vector3.new(3, 2, 1.5), OldWood)
+      Block("Smith_TroughWater", Vector3.new(x + 8, 1.5, z + 4), Vector3.new(2.5, 1, 1), WaterDeep)
+    end
+    BuildTavern = function ()
+      local x = - 55 local z = 115
+
+      -- Large main building
+      Block("Tavern_Main", Vector3.new(x, 7, z), Vector3.new(20, 14, 18), PlasterCream)
+
+      -- Timber frame
+      local b = 0.8
+      Block("Tavern_Frame1", Vector3.new(x - 10, 7, z + 9), Vector3.new(b, 14, b), DarkTimber)
+      Block("Tavern_Frame2", Vector3.new(x + 10, 7, z + 9), Vector3.new(b, 14, b), DarkTimber)
+      Block("Tavern_Frame3", Vector3.new(x, 7, z + 9), Vector3.new(b, 14, b), DarkTimber)
+      Block("Tavern_HFrame1", Vector3.new(x, 0.5, z + 9), Vector3.new(20.5, b, b), DarkTimber)
+      Block("Tavern_HFrame2", Vector3.new(x, 7, z + 9), Vector3.new(20.5, b, b), DarkTimber)
+      Block("Tavern_HFrame3", Vector3.new(x, 14, z + 9), Vector3.new(20.5, b, b), DarkTimber)
+
+      -- Roof
+      Block("Tavern_RoofL", Vector3.new(x - 6, 17, z), Vector3.new(12, 8, 20), RoofBrown)
+      Block("Tavern_RoofR", Vector3.new(x + 6, 17, z), Vector3.new(12, 8, 20), RoofBrown)
+      Block("Tavern_Ridge", Vector3.new(x, 21.5, z), Vector3.new(2, 1.5, 21), DarkTimber)
+
+      -- Chimney
+      Block("Tavern_Chimney", Vector3.new(x + 6, 18, z - 5), Vector3.new(3, 10, 3), DarkStone)
+
+      -- Door
+      Block("Tavern_Door", Vector3.new(x, 3.5, z + 9.2), Vector3.new(4, 7, 0.4), DarkTimber)
+
+      -- Sign
+      Block("Tavern_SignPost", Vector3.new(x + 8, 5, z + 10), Vector3.new(0.5, 10, 0.5), DarkTimber)
+      Block("Tavern_SignArm", Vector3.new(x + 10, 9, z + 10), Vector3.new(4, 0.3, 0.3), DarkTimber)
+      Block("Tavern_Sign", Vector3.new(x + 10, 7.5, z + 10), Vector3.new(3, 2.5, 0.3), OldWood)
+
+      -- Windows with warm light
+      Block("Tavern_Win1", Vector3.new(x - 6, 5, z + 9.2), Vector3.new(3, 4, 0.2), Color3.fromRGB(255, 220, 150))
+      Block("Tavern_Win2", Vector3.new(x + 6, 5, z + 9.2), Vector3.new(3, 4, 0.2), Color3.fromRGB(255, 220, 150))
+      Block("Tavern_Win3", Vector3.new(x - 6, 11, z + 9.2), Vector3.new(2.5, 3, 0.2), WindowBlue)
+      Block("Tavern_Win4", Vector3.new(x + 6, 11, z + 9.2), Vector3.new(2.5, 3, 0.2), WindowBlue)
+
+      -- Outdoor seating area
+      Block("Tavern_Table1", Vector3.new(x - 5, 1.5, z + 15), Vector3.new(4, 0.5, 3), OldWood)
+      Block("Tavern_Bench1", Vector3.new(x - 5, 1, z + 17), Vector3.new(4, 1, 1), OldWood)
+      Block("Tavern_Table2", Vector3.new(x + 5, 1.5, z + 15), Vector3.new(4, 0.5, 3), OldWood)
+      Block("Tavern_Bench2", Vector3.new(x + 5, 1, z + 17), Vector3.new(4, 1, 1), OldWood)
+
+      -- Barrels outside
+      Block("Tavern_Barrel1", Vector3.new(x + 12, 1.5, z + 8), Vector3.new(2.5, 3, 2.5), MediumTimber)
+      Block("Tavern_Barrel2", Vector3.new(x + 12, 1.5, z + 5), Vector3.new(2.5, 3, 2.5), MediumTimber)
+      Block("Tavern_Barrel3", Vector3.new(x + 12, 4, z + 6.5), Vector3.new(2.5, 3, 2.5), MediumTimber)
+    end
+    BuildMill = function ()
+      local x = - 70 local z = 70
+
+      -- Main building
+      Block("Mill_Base", Vector3.new(x, 8, z), Vector3.new(14, 16, 14), LightStone)
+
+      -- Conical roof
+      Block("Mill_Roof1", Vector3.new(x, 18, z), Vector3.new(16, 4, 16), ThatchYellow)
+      Block("Mill_Roof2", Vector3.new(x, 21, z), Vector3.new(12, 4, 12), ThatchYellow)
+      Block("Mill_Roof3", Vector3.new(x, 24, z), Vector3.new(8, 4, 8), ThatchYellow)
+      Block("Mill_Roof4", Vector3.new(x, 26.5, z), Vector3.new(4, 3, 4), ThatchYellow)
+
+      -- Mill sails (simplified as flat rectangles)
+      Block("Mill_Hub", Vector3.new(x, 12, z + 7.5), Vector3.new(3, 3, 1), DarkTimber)
+      Block("Mill_Sail1", Vector3.new(x, 20, z + 8), Vector3.new(2, 14, 0.3), LightWood)
+      Block("Mill_Sail2", Vector3.new(x, 4, z + 8), Vector3.new(2, 14, 0.3), LightWood)
+      Block("Mill_Sail3", Vector3.new(x - 8, 12, z + 8), Vector3.new(14, 2, 0.3), LightWood)
+      Block("Mill_Sail4", Vector3.new(x + 8, 12, z + 8), Vector3.new(14, 2, 0.3), LightWood)
+
+      -- Door
+      Block("Mill_Door", Vector3.new(x, 3, z + 7.2), Vector3.new(3, 6, 0.4), DarkTimber)
+    end
+    BuildWell = function (name, pos)
+      local x = pos.X local y = pos.Y local z = pos.Z
+
+      Block(name .. "_Base", Vector3.new(x, y + 1.5, z), Vector3.new(5, 3, 5), MediumStone)
+      Block(name .. "_Water", Vector3.new(x, y + 2.2, z), Vector3.new(3.5, 1, 3.5), WaterDeep)
+      Block(name .. "_PostL", Vector3.new(x - 2, y + 5, z), Vector3.new(0.6, 7, 0.6), DarkTimber)
+      Block(name .. "_PostR", Vector3.new(x + 2, y + 5, z), Vector3.new(0.6, 7, 0.6), DarkTimber)
+      Block(name .. "_Beam", Vector3.new(x, y + 8.5, z), Vector3.new(5, 0.6, 0.8), DarkTimber)
+      Block(name .. "_Roof", Vector3.new(x, y + 9.5, z), Vector3.new(6, 1.5, 4), RoofBrown)
+    end
+    BuildTrees = function ()
+      -- Trees scattered around
+      BuildTree("Tree_1", Vector3.new(- 80, 0, 50))
+      BuildTree("Tree_2", Vector3.new(- 85, 0, 80))
+      BuildTree("Tree_3", Vector3.new(- 90, 0, 120))
+      BuildTree("Tree_4", Vector3.new(80, 0, 60))
+      BuildTree("Tree_5", Vector3.new(85, 0, 100))
+      BuildTree("Tree_6", Vector3.new(75, 0, 140))
+      BuildTree("Tree_7", Vector3.new(- 75, 0, 170))
+      BuildTree("Tree_8", Vector3.new(70, 0, 175))
+
+      -- Trees behind castle
+      BuildTree("Tree_B1", Vector3.new(- 50, 2, - 60))
+      BuildTree("Tree_B2", Vector3.new(- 30, 2, - 70))
+      BuildTree("Tree_B3", Vector3.new(30, 2, - 65))
+      BuildTree("Tree_B4", Vector3.new(55, 2, - 55))
+
+      -- Small grove
+      BuildTree("Tree_G1", Vector3.new(90, 0, 80))
+      BuildTree("Tree_G2", Vector3.new(95, 0, 85))
+      BuildTree("Tree_G3", Vector3.new(88, 0, 92))
+    end
+    BuildTree = function (name, pos)
+      local x = pos.X local y = pos.Y local z = pos.Z
+      local height = 8 + System.mod((x + z), 6)
+      -- Vary height
+      local canopySize = 6 + System.mod((x + z), 4)
+
+      -- Trunk
+      Block(name .. "_Trunk", Vector3.new(x, y + height / 2, z), Vector3.new(1.5, height, 1.5), TrunkBrown)
+
+      -- Canopy (layered for fullness)
+      Block(name .. "_Canopy1", Vector3.new(x, y + height + canopySize / 2, z), Vector3.new(canopySize, canopySize, canopySize), TreeGreen)
+      Block(name .. "_Canopy2", Vector3.new(x + 1, y + height + canopySize / 2 + 1, z + 1), Vector3.new(canopySize * 0.7, canopySize * 0.8, canopySize * 0.7), TreeDark)
+      Block(name .. "_Canopy3", Vector3.new(x - 0.5, y + height + canopySize / 2 - 1, z - 0.5), Vector3.new(canopySize * 0.8, canopySize * 0.6, canopySize * 0.8), TreeGreen)
+    end
+    BuildGardens = function ()
+      -- Garden plots near houses
+      BuildGardenPlot("Garden_1", Vector3.new(- 50, 0, 90))
+      BuildGardenPlot("Garden_2", Vector3.new(50, 0, 125))
+      BuildGardenPlot("Garden_3", Vector3.new(- 48, 0, 140))
+    end
+    BuildGardenPlot = function (name, pos)
+      local x = pos.X local z = pos.Z
+
+      -- Soil
+      Block(name .. "_Soil", Vector3.new(x, 0.2, z), Vector3.new(8, 0.4, 6), Color3.fromRGB(90, 70, 50))
+
+      -- Fence
+      Block(name .. "_FenceF", Vector3.new(x, 1, z + 3.2), Vector3.new(8.5, 2, 0.3), LightWood)
+      Block(name .. "_FenceB", Vector3.new(x, 1, z - 3.2), Vector3.new(8.5, 2, 0.3), LightWood)
+      Block(name .. "_FenceL", Vector3.new(x - 4.2, 1, z), Vector3.new(0.3, 2, 6.5), LightWood)
+      Block(name .. "_FenceR", Vector3.new(x + 4.2, 1, z), Vector3.new(0.3, 2, 6.5), LightWood)
+
+      -- Crops (colored rows)
+      Block(name .. "_Crop1", Vector3.new(x - 2, 0.7, z), Vector3.new(1.5, 1, 5), Color3.fromRGB(60, 140, 50))
+      Block(name .. "_Crop2", Vector3.new(x, 0.6, z), Vector3.new(1.5, 0.8, 5), Color3.fromRGB(70, 150, 40))
+      Block(name .. "_Crop3", Vector3.new(x + 2, 0.8, z), Vector3.new(1.5, 1.2, 5), Color3.fromRGB(50, 130, 45))
+    end
+    BuildDecorations = function ()
+      -- Lamp posts along the main road
+      BuildLampPost("Lamp_1", Vector3.new(- 6, 0, 40))
+      BuildLampPost("Lamp_2", Vector3.new(6, 0, 60))
+      BuildLampPost("Lamp_3", Vector3.new(- 6, 0, 80))
+      BuildLampPost("Lamp_4", Vector3.new(6, 0, 95))
+
+      -- Carts
+      BuildCart("Cart_1", Vector3.new(- 25, 0, 95))
+      BuildCart("Cart_2", Vector3.new(28, 0, 120))
+
+      -- Signpost at village entrance
+      Block("Sign_Post", Vector3.new(0, 3, 45), Vector3.new(0.5, 6, 0.5), DarkTimber)
+      Block("Sign_Board", Vector3.new(2, 5, 45), Vector3.new(4, 2, 0.3), OldWood)
+    end
+    BuildLampPost = function (name, pos)
+      local x = pos.X local z = pos.Z
+
+      Block(name .. "_Post", Vector3.new(x, 4, z), Vector3.new(0.5, 8, 0.5), MetalDark)
+      Block(name .. "_Arm", Vector3.new(x + 0.8, 7.5, z), Vector3.new(1.5, 0.3, 0.3), MetalDark)
+      Block(name .. "_Lantern", Vector3.new(x + 1.3, 7, z), Vector3.new(1, 1.5, 1), Color3.fromRGB(255, 240, 180))
+      Block(name .. "_LanternTop", Vector3.new(x + 1.3, 8, z), Vector3.new(1.2, 0.5, 1.2), MetalDark)
+    end
+    BuildCart = function (name, pos)
+      local x = pos.X local z = pos.Z
+
+      -- Cart body
+      Block(name .. "_Body", Vector3.new(x, 2, z), Vector3.new(5, 2, 3), OldWood)
+      Block(name .. "_Front", Vector3.new(x + 2.7, 2.5, z), Vector3.new(0.5, 3, 3), OldWood)
+
+      -- Wheels (simplified as dark blocks)
+      Block(name .. "_WheelL", Vector3.new(x, 1.2, z + 2), Vector3.new(0.5, 2.4, 2.4), DarkTimber)
+      Block(name .. "_WheelR", Vector3.new(x, 1.2, z - 2), Vector3.new(0.5, 2.4, 2.4), DarkTimber)
+
+      -- Handle
+      Block(name .. "_Handle", Vector3.new(x - 4, 2, z), Vector3.new(3, 0.3, 0.3), DarkTimber)
+
+      -- Hay in cart
+      Block(name .. "_Hay", Vector3.new(x, 3.5, z), Vector3.new(4, 1.5, 2.5), HayYellow)
+    end
+    BuildPond = function ()
+      local x = 75 local z = 160
+
+      -- Pond shape (overlapping circles approximated with blocks)
+      Block("Pond_Main", Vector3.new(x, - 0.3, z), Vector3.new(20, 1, 15), Water)
+      Block("Pond_Deep", Vector3.new(x, - 0.8, z), Vector3.new(14, 1, 10), WaterDeep)
+      Block("Pond_Edge1", Vector3.new(x - 8, - 0.2, z - 5), Vector3.new(8, 0.8, 8), Water)
+      Block("Pond_Edge2", Vector3.new(x + 6, - 0.2, z + 5), Vector3.new(10, 0.8, 8), Water)
+
+      -- Rocks around edge
+      Block("Pond_Rock1", Vector3.new(x - 11, 0.5, z), Vector3.new(2, 1.5, 2), MossyStone)
+      Block("Pond_Rock2", Vector3.new(x + 10, 0.3, z + 6), Vector3.new(1.5, 1, 2), DarkStone)
+      Block("Pond_Rock3", Vector3.new(x - 5, 0.4, z - 8), Vector3.new(2.5, 1.2, 1.5), MossyStone)
+
+      -- Reeds
+      Block("Pond_Reeds1", Vector3.new(x - 9, 1.5, z + 3), Vector3.new(0.5, 3, 0.5), Color3.fromRGB(80, 120, 50))
+      Block("Pond_Reeds2", Vector3.new(x - 8, 1.3, z + 4), Vector3.new(0.5, 2.6, 0.5), Color3.fromRGB(70, 110, 45))
+      Block("Pond_Reeds3", Vector3.new(x + 9, 1.2, z - 4), Vector3.new(0.5, 2.4, 0.5), Color3.fromRGB(75, 115, 50))
+    end
+    BuildBridge = function ()
+      -- Small wooden bridge near the pond
+      local x = 60 local z = 155
+
+      Block("Bridge_Deck", Vector3.new(x, 1, z), Vector3.new(6, 0.5, 12), LightWood)
+      Block("Bridge_RailL", Vector3.new(x - 2.7, 2.5, z), Vector3.new(0.4, 2.5, 12), DarkTimber)
+      Block("Bridge_RailR", Vector3.new(x + 2.7, 2.5, z), Vector3.new(0.4, 2.5, 12), DarkTimber)
+
+      -- Support posts
+      Block("Bridge_Post1", Vector3.new(x - 2.7, 0.5, z - 5), Vector3.new(0.6, 2, 0.6), DarkTimber)
+      Block("Bridge_Post2", Vector3.new(x + 2.7, 0.5, z - 5), Vector3.new(0.6, 2, 0.6), DarkTimber)
+      Block("Bridge_Post3", Vector3.new(x - 2.7, 0.5, z + 5), Vector3.new(0.6, 2, 0.6), DarkTimber)
+      Block("Bridge_Post4", Vector3.new(x + 2.7, 0.5, z + 5), Vector3.new(0.6, 2, 0.6), DarkTimber)
     end
     return {
       Setup = Setup,
